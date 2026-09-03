@@ -1,0 +1,2606 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>First | Fantasy Service</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/JsBarcode/3.11.5/JsBarcode.all.min.js"></script>
+<style>
+:root{
+  --blue-950:#050b1a;
+  --blue-900:#0a1530;
+  --blue-800:#0f2049;
+  --blue-700:#15306b;
+  --blue-600:#1c4694;
+  --blue-500:#2e63c9;
+  --blue-400:#4c8bf0;
+  --cyan:#33e0ff;
+  --cyan-dim:#1aa8c2;
+  --gold:#ffb545;
+  --danger:#ff5470;
+  --good:#3ee089;
+  --text-1:#eaf1ff;
+  --text-2:#9db1d8;
+  --text-3:#5f79ab;
+  --surface:#0c1938;
+  --surface-2:#0f2246;
+  --surface-3:#132a56;
+  --border:rgba(120,160,255,0.14);
+  --bg-app: radial-gradient(1200px 700px at 85% -10%, #16307a30, transparent 60%),
+            radial-gradient(1000px 600px at -10% 110%, #0c2a5c40, transparent 60%),
+            var(--blue-950);
+  --shadow-glow: 0 0 0 1px rgba(80,140,255,.12), 0 20px 60px -20px rgba(0,20,80,.7);
+  --radius: 16px;
+}
+html[data-theme="light"]{
+  --blue-950:#eef3fc;
+  --blue-900:#e4ecfb;
+  --surface:#ffffff;
+  --surface-2:#f3f7ff;
+  --surface-3:#e9f0fe;
+  --border:rgba(30,70,160,0.12);
+  --text-1:#0b1938;
+  --text-2:#41537d;
+  --text-3:#7488ae;
+  --bg-app: radial-gradient(1200px 700px at 85% -10%, #cfe0ff70, transparent 60%),
+            radial-gradient(1000px 600px at -10% 110%, #dfe9ff70, transparent 60%),
+            var(--blue-950);
+  --shadow-glow: 0 0 0 1px rgba(30,70,160,.08), 0 20px 50px -25px rgba(20,50,120,.25);
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+body{
+  font-family:'IBM Plex Sans Arabic','Tajawal',sans-serif;
+  background:var(--bg-app);
+  color:var(--text-1);
+  min-height:100vh;
+  transition:background .4s ease, color .4s ease;
+  overflow-x:hidden;
+}
+h1,h2,h3,.brand,.big-num{font-family:'Tajawal',sans-serif;}
+::selection{background:var(--blue-500); color:#fff;}
+button{font-family:inherit; cursor:pointer; border:none;}
+input,select,textarea{font-family:inherit; color:var(--text-1); background:var(--surface-2); border:1px solid var(--border); border-radius:10px; padding:11px 14px; font-size:14.5px; outline:none; transition:border-color .2s, box-shadow .2s;}
+input:focus,select:focus,textarea:focus{border-color:var(--blue-400); box-shadow:0 0 0 3px rgba(76,139,240,.18);}
+::-webkit-scrollbar{width:8px; height:8px;}
+::-webkit-scrollbar-thumb{background:var(--blue-600); border-radius:8px;}
+
+.circuit-bg{position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.35;}
+html[data-theme="light"] .circuit-bg{opacity:.18;}
+
+#splash{position:fixed; inset:0; z-index:999; display:flex; align-items:center; justify-content:center; background:var(--blue-950); transition:opacity .6s ease, visibility .6s;}
+.power-ring{width:90px; height:90px; border-radius:50%; position:relative; display:flex; align-items:center; justify-content:center;}
+.power-ring::before,.power-ring::after{content:''; position:absolute; inset:0; border-radius:50%; border:2px solid var(--cyan); opacity:.6; animation:ringPulse 1.8s ease-out infinite;}
+.power-ring::after{animation-delay:.6s;}
+.power-ring span{width:36px; height:36px; border-radius:50%; background:radial-gradient(circle at 35% 30%, var(--cyan), var(--blue-500) 70%); box-shadow:0 0 30px 6px rgba(51,224,255,.55);}
+@keyframes ringPulse{0%{transform:scale(.6); opacity:.9;} 100%{transform:scale(2.4); opacity:0;}}
+
+.login-wrap{position:relative; z-index:1; min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px;}
+.login-card{width:100%; max-width:400px; background:linear-gradient(180deg, var(--surface), var(--surface-2)); border:1px solid var(--border); border-radius:22px; padding:38px 30px 30px; box-shadow:var(--shadow-glow); position:relative; overflow:hidden; animation:cardIn .7s cubic-bezier(.2,.8,.2,1);}
+.login-card::before{content:''; position:absolute; top:-60%; right:-40%; width:280px; height:280px; background:radial-gradient(circle, rgba(51,224,255,.25), transparent 70%); filter:blur(10px);}
+@keyframes cardIn{from{opacity:0; transform:translateY(24px) scale(.97);} to{opacity:1; transform:translateY(0) scale(1);}}
+.brand-mark{display:flex; align-items:center; gap:12px; justify-content:center; margin-bottom:6px;}
+.logo-chip{width:46px; height:46px; border-radius:13px; background:linear-gradient(135deg, var(--blue-500), var(--cyan)); display:flex; align-items:center; justify-content:center; font-weight:900; font-size:20px; color:#04101f; box-shadow:0 8px 24px -6px rgba(51,224,255,.5); position:relative;}
+.logo-chip::after{content:''; position:absolute; inset:-4px; border-radius:16px; border:1px solid rgba(51,224,255,.4); animation:ringPulse 2.4s ease-out infinite;}
+.brand-title{font-size:24px; font-weight:900; letter-spacing:.5px;}
+.brand-sub{text-align:center; color:var(--text-3); font-size:12.5px; letter-spacing:2px; text-transform:uppercase; margin-bottom:30px;}
+.login-card label{display:block; font-size:13px; color:var(--text-2); margin:16px 0 6px;}
+.login-card input{width:100%;}
+.login-btn{width:100%; margin-top:24px; padding:13px; border-radius:12px; background:linear-gradient(90deg, var(--blue-500), var(--cyan-dim)); color:#fff; font-weight:700; font-size:15px; letter-spacing:.5px; box-shadow:0 10px 24px -8px rgba(46,99,201,.6); transition:transform .15s, box-shadow .15s;}
+.login-btn:hover{transform:translateY(-2px); box-shadow:0 14px 28px -8px rgba(51,224,255,.5);}
+.login-btn:active{transform:translateY(0);}
+.login-hint{margin-top:16px; text-align:center; font-size:12px; color:var(--text-3);}
+.login-err{margin-top:10px; font-size:13px; color:var(--danger); text-align:center; min-height:16px;}
+.theme-toggle-float{position:fixed; top:18px; left:18px; z-index:5;}
+
+#app{display:none; min-height:100vh; position:relative; z-index:1;}
+.topbar{display:flex; align-items:center; justify-content:space-between; padding:14px 22px; border-bottom:1px solid var(--border); background:color-mix(in srgb, var(--surface) 88%, transparent); backdrop-filter:blur(10px); position:sticky; top:0; z-index:20;}
+.topbar-left{display:flex; align-items:center; gap:12px;}
+.topbar .brand-title{font-size:18px;}
+.topbar .logo-chip{width:36px; height:36px; font-size:15px; border-radius:10px;}
+.crumb{color:var(--text-3); font-size:13px; display:flex; align-items:center; gap:6px;}
+.crumb b{color:var(--text-1); font-weight:600;}
+.topbar-right{display:flex; align-items:center; gap:10px;}
+.icon-btn{width:38px; height:38px; border-radius:10px; background:var(--surface-2); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; color:var(--text-2); font-size:16px; transition:.2s;}
+.icon-btn:hover{background:var(--surface-3); color:var(--text-1);}
+.user-chip{display:flex; align-items:center; gap:8px; background:var(--surface-2); border:1px solid var(--border); padding:6px 12px 6px 6px; border-radius:30px; font-size:13px;}
+.user-chip .avatar{width:26px; height:26px; border-radius:50%; background:linear-gradient(135deg,var(--blue-500),var(--cyan)); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:12px; color:#04101f;}
+.logout-btn{background:transparent; color:var(--text-3); font-size:12.5px; text-decoration:underline; text-underline-offset:3px;}
+.logout-btn:hover{color:var(--danger);}
+
+.view{padding:22px; max-width:1180px; margin:0 auto; animation:viewIn .45s cubic-bezier(.2,.8,.2,1);}
+@keyframes viewIn{from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);}}
+
+.section-grid{display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-top:26px;}
+@media (max-width:640px){.section-grid{grid-template-columns:1fr;}}
+.section-card{position:relative; background:linear-gradient(160deg, var(--surface), var(--surface-2)); border:1px solid var(--border); border-radius:20px; padding:30px 26px; overflow:hidden; transition:transform .25s, box-shadow .25s, border-color .25s; text-align:right;}
+.section-card:hover{transform:translateY(-6px); box-shadow:var(--shadow-glow); border-color:var(--blue-400);}
+.section-card .sc-icon{width:56px; height:56px; border-radius:16px; background:linear-gradient(135deg,var(--blue-600),var(--cyan-dim)); display:flex; align-items:center; justify-content:center; font-size:26px; margin-bottom:18px; box-shadow:0 10px 24px -8px rgba(51,224,255,.35);}
+.section-card h3{font-size:19px; margin-bottom:8px;}
+.section-card p{color:var(--text-3); font-size:13.5px; line-height:1.7;}
+.section-card .sc-arrow{position:absolute; left:22px; bottom:22px; color:var(--cyan); font-size:20px; transition:transform .25s;}
+.section-card:hover .sc-arrow{transform:translateX(-6px);}
+.hero-title{font-size:26px; font-weight:800;}
+.hero-sub{color:var(--text-3); font-size:14px; margin-top:6px;}
+
+.module-shell{display:grid; grid-template-columns:230px 1fr; gap:20px; align-items:start;}
+@media (max-width:860px){.module-shell{grid-template-columns:1fr;}}
+.side-nav{background:var(--surface); border:1px solid var(--border); border-radius:18px; padding:14px; position:sticky; top:80px;}
+@media (max-width:860px){.side-nav{position:static; display:flex; overflow-x:auto; gap:8px; padding:10px;}}
+.side-nav button{display:flex; align-items:center; gap:10px; width:100%; text-align:right; background:transparent; color:var(--text-2); padding:11px 12px; border-radius:11px; font-size:14px; margin-bottom:3px; transition:.2s; white-space:nowrap;}
+@media (max-width:860px){.side-nav button{width:auto; margin-bottom:0;}}
+.side-nav button:hover{background:var(--surface-2); color:var(--text-1);}
+.side-nav button.active{background:linear-gradient(90deg, var(--blue-600), var(--blue-700)); color:#fff; box-shadow:0 6px 16px -6px rgba(46,99,201,.6);}
+.side-nav .sn-icon{width:20px; text-align:center; opacity:.9;}
+
+.panel{background:var(--surface); border:1px solid var(--border); border-radius:18px; padding:22px; min-height:420px;}
+.panel-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; flex-wrap:wrap; gap:10px;}
+.panel-head h2{font-size:19px;}
+.panel-head h3{font-size:16px;}
+.panel-head .ph-sub{color:var(--text-3); font-size:13px; margin-top:3px;}
+
+.btn{padding:10px 18px; border-radius:10px; font-size:13.5px; font-weight:600; transition:.2s; display:inline-flex; align-items:center; gap:6px;}
+.btn-primary{background:linear-gradient(90deg,var(--blue-500),var(--cyan-dim)); color:#fff; box-shadow:0 8px 18px -8px rgba(46,99,201,.6);}
+.btn-primary:hover{transform:translateY(-1px); box-shadow:0 10px 22px -6px rgba(51,224,255,.5);}
+.btn-ghost{background:var(--surface-2); color:var(--text-1); border:1px solid var(--border);}
+.btn-ghost:hover{background:var(--surface-3);}
+.btn-danger{background:rgba(255,84,112,.12); color:var(--danger); border:1px solid rgba(255,84,112,.3);}
+.btn-danger:hover{background:rgba(255,84,112,.2);}
+.btn-sm{padding:6px 12px; font-size:12.5px; border-radius:8px;}
+
+.form-grid{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+@media (max-width:600px){.form-grid{grid-template-columns:1fr;}}
+.form-grid .full{grid-column:1/-1;}
+.field label{display:block; font-size:12.5px; color:var(--text-2); margin-bottom:6px;}
+.field input,.field select,.field textarea{width:100%;}
+
+table{width:100%; border-collapse:collapse; font-size:13.5px;}
+thead th{text-align:right; color:var(--text-3); font-weight:600; font-size:12px; text-transform:uppercase; letter-spacing:.4px; padding:10px 12px; border-bottom:1px solid var(--border);}
+tbody td{padding:12px; border-bottom:1px solid var(--border); color:var(--text-1);}
+tbody tr{transition:background .15s;}
+tbody tr:hover{background:var(--surface-2);}
+.table-wrap{overflow-x:auto;}
+.badge{padding:4px 10px; border-radius:20px; font-size:11.5px; font-weight:700; display:inline-block;}
+.badge-wait{background:rgba(255,181,69,.15); color:var(--gold);}
+.badge-progress{background:rgba(76,139,240,.15); color:var(--blue-400);}
+.badge-ready{background:rgba(51,224,255,.15); color:var(--cyan);}
+.badge-done{background:rgba(62,224,137,.15); color:var(--good);}
+.badge-low{background:rgba(255,84,112,.15); color:var(--danger);}
+.empty-state{text-align:center; padding:50px 20px; color:var(--text-3);}
+.empty-state .es-icon{font-size:38px; margin-bottom:10px; opacity:.6;}
+
+.stat-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:22px;}
+@media (max-width:800px){.stat-grid{grid-template-columns:1fr 1fr;}}
+.stat-card{background:linear-gradient(160deg,var(--surface-2),var(--surface)); border:1px solid var(--border); border-radius:14px; padding:18px;}
+.stat-card .st-label{font-size:12px; color:var(--text-3); margin-bottom:8px;}
+.stat-card .st-value{font-size:24px; font-weight:800;}
+.stat-card .st-trend{font-size:11.5px; margin-top:6px; color:var(--good);}
+.bars{display:flex; align-items:flex-end; gap:10px; height:160px; padding:10px 4px;}
+.bar-col{flex:1; display:flex; flex-direction:column; align-items:center; gap:8px;}
+.bar-col .bar{width:100%; border-radius:8px 8px 0 0; background:linear-gradient(180deg,var(--cyan),var(--blue-600)); transition:height .6s cubic-bezier(.2,.8,.2,1); box-shadow:0 0 16px -4px rgba(51,224,255,.5);}
+.bar-col .bar-label{font-size:11px; color:var(--text-3);}
+
+.role-tag{padding:3px 10px; border-radius:8px; font-size:11.5px; font-weight:700; background:var(--surface-3); color:var(--text-2);}
+.role-admin{background:rgba(255,181,69,.15); color:var(--gold);}
+.modal-bg{position:fixed; inset:0; background:rgba(4,10,25,.6); backdrop-filter:blur(4px); display:flex; align-items:center; justify-content:center; z-index:100; padding:20px; opacity:0; pointer-events:none; transition:opacity .25s;}
+.modal-bg.show{opacity:1; pointer-events:auto;}
+.modal{background:var(--surface); border:1px solid var(--border); border-radius:18px; padding:24px; width:100%; max-width:440px; max-height:86vh; overflow-y:auto; box-shadow:var(--shadow-glow); transform:translateY(10px); transition:transform .25s;}
+.modal.modal-wide{max-width:640px;}
+.modal-bg.show .modal{transform:translateY(0);}
+.modal h3{margin-bottom:14px; font-size:17px;}
+.modal-actions{display:flex; gap:10px; margin-top:18px; justify-content:flex-end;}
+
+.toast{position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--surface-3); border:1px solid var(--border); color:var(--text-1); padding:12px 22px; border-radius:12px; font-size:13.5px; z-index:200; opacity:0; transition:.3s; box-shadow:var(--shadow-glow); display:flex; align-items:center; gap:8px;}
+.toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+.toast .t-dot{width:8px; height:8px; border-radius:50%; background:var(--good);}
+
+.search-bar{display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap;}
+.search-bar input{flex:1; min-width:180px;}
+.price-input{width:110px !important;}
+
+.seg-toggle{display:flex; background:var(--surface-2); border:1px solid var(--border); border-radius:12px; padding:4px; gap:4px;}
+.seg-toggle button{flex:1; padding:9px; border-radius:9px; background:transparent; color:var(--text-2); font-size:13.5px; font-weight:600; transition:.2s;}
+.seg-toggle button.active{background:linear-gradient(90deg,var(--blue-500),var(--cyan-dim)); color:#fff;}
+
+.controller-card{border:1px solid var(--border); border-radius:14px; padding:16px; margin-bottom:14px; background:var(--surface-2);}
+.controller-card .cc-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;}
+.controller-card .cc-title{font-weight:700; font-size:14.5px; display:flex; align-items:center; gap:8px;}
+.console-badge{padding:3px 10px; border-radius:8px; font-size:11px; font-weight:700;}
+.console-ps5{background:rgba(51,224,255,.15); color:var(--cyan);}
+.console-ps4{background:rgba(76,139,240,.15); color:var(--blue-400);}
+.item-row{display:flex; justify-content:space-between; align-items:center; padding:7px 0; border-bottom:1px dashed var(--border); font-size:13px;}
+.item-row:last-child{border-bottom:none;}
+.item-row .ir-side{color:var(--text-3); font-size:11.5px; margin-right:6px;}
+.item-row .ir-price{color:var(--text-2); font-weight:600;}
+.item-del{color:var(--danger); cursor:pointer; font-size:13px; margin-right:10px;}
+.cc-sub{display:flex; justify-content:space-between; margin-top:10px; padding-top:10px; border-top:1px solid var(--border); font-weight:700; font-size:13.5px;}
+.cc-actions{display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;}
+.grand-total{display:flex; justify-content:space-between; align-items:center; padding:16px; margin-top:6px; background:linear-gradient(90deg, var(--surface-3), var(--surface-2)); border-radius:14px; border:1px solid var(--border); font-size:17px; font-weight:800;}
+.checkbox-list{max-height:260px; overflow-y:auto; border:1px solid var(--border); border-radius:12px; padding:8px;}
+.cb-item{display:flex; align-items:center; justify-content:space-between; padding:9px 8px; border-bottom:1px solid var(--border); font-size:13.5px; gap:8px; flex-wrap:wrap;}
+.cb-item:last-child{border-bottom:none;}
+.cb-item label{display:flex; align-items:center; gap:6px; cursor:pointer;}
+.cb-item input[type=checkbox]{width:16px; height:16px; accent-color:var(--blue-500);}
+.cb-side-group{display:flex; gap:12px;}
+.parts-columns{display:grid; grid-template-columns:1fr 1fr; gap:18px;}
+@media(max-width:800px){.parts-columns{grid-template-columns:1fr;}}
+#printArea{display:none;}
+@media print{
+  @page{ size:80mm auto; margin:3mm 2mm; }
+  body *{visibility:hidden;}
+  #printArea, #printArea *{visibility:visible;}
+  #printArea{display:block; position:absolute; top:0; left:0; width:100%; padding:6px; color:#000;}
+}
+
+.switch{position:relative; width:46px; height:26px; background:var(--surface-3); border-radius:20px; border:1px solid var(--border); transition:.25s;}
+.switch::after{content:''; position:absolute; top:2px; right:2px; width:20px; height:20px; border-radius:50%; background:linear-gradient(135deg,var(--gold),#ffdca0); transition:.25s; box-shadow:0 2px 6px rgba(0,0,0,.3);}
+html[data-theme="dark"] .switch::after{background:linear-gradient(135deg,var(--blue-400),var(--cyan)); transform:translateX(-20px);}
+.sync-badge{display:flex; align-items:center; gap:6px; font-size:11.5px; color:var(--text-3); padding:6px 10px; border-radius:20px; background:var(--surface-2); border:1px solid var(--border); white-space:nowrap;}
+.sync-dot{width:7px; height:7px; border-radius:50%; background:var(--text-3);}
+.sync-dot.on{background:var(--good); box-shadow:0 0 6px var(--good);}
+.sync-dot.busy{background:var(--gold); animation:ringPulse 1s ease-out infinite;}
+.sync-dot.off{background:var(--danger);}
+
+.stat-grid-3{grid-template-columns:repeat(3,1fr);}
+@media (max-width:800px){.stat-grid-3{grid-template-columns:1fr 1fr;}}
+
+/* ===== Mobile pass ===== */
+@media (max-width:600px){
+  body{font-size:14.5px;}
+  .view{padding:12px;}
+  .topbar{padding:10px 12px; gap:8px;}
+  .topbar-left{gap:8px; min-width:0; overflow:hidden;}
+  .topbar-left .brand-title{font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .topbar-left .brand-title span{display:none;}
+  .crumb{display:none;}
+  .topbar-right{gap:6px;}
+  .sync-badge{padding:5px 8px;}
+  .sync-badge span:not(.sync-dot){display:none;}
+  .user-chip{padding:4px;}
+  .user-chip span:not(.avatar){display:none;}
+  .logout-btn{font-size:11px; white-space:nowrap;}
+  .icon-btn{width:32px; height:32px; font-size:14px;}
+  .hero-title{font-size:20px;}
+  .hero-sub{font-size:12.5px;}
+  .section-card{padding:18px 16px;}
+  .section-card .sc-icon{width:44px; height:44px; font-size:20px; margin-bottom:12px;}
+  .section-card h3{font-size:16px;}
+  .panel{padding:14px; border-radius:14px;}
+  .panel-head h2{font-size:16.5px;}
+  .panel-head h3{font-size:14.5px;}
+  .stat-grid, .stat-grid-3{grid-template-columns:1fr 1fr !important; gap:8px;}
+  .stat-card{padding:12px;}
+  .stat-card .st-value{font-size:19px;}
+  .modal{padding:16px; max-width:94vw !important; border-radius:14px;}
+  .modal h3{font-size:15px;}
+  .modal-actions{flex-direction:column-reverse; align-items:stretch;}
+  .modal-actions > div{flex-direction:column; align-items:stretch;}
+  .modal-actions .btn{width:100%; justify-content:center;}
+  .btn{padding:9px 14px; font-size:13px;}
+  .btn-sm{padding:7px 11px; font-size:12px;}
+  table{font-size:12px;}
+  thead th{padding:8px 6px; font-size:10.5px;}
+  tbody td{padding:8px 6px;}
+  .search-bar{flex-direction:column;}
+  .search-bar input, .search-bar select{width:100%;}
+  .controller-card{padding:12px;}
+  .cc-actions{flex-direction:column;}
+  .cc-actions .btn{width:100%; justify-content:center;}
+  .login-card{padding:26px 18px 22px;}
+  .side-nav button{font-size:13px; padding:9px 10px;}
+}
+</style>
+</head>
+<body>
+
+<canvas class="circuit-bg" id="circuitCanvas"></canvas>
+
+<div id="splash"><div class="power-ring"><span></span></div></div>
+
+<!-- LOGIN -->
+<div class="login-wrap" id="loginWrap">
+  <button class="icon-btn theme-toggle-float" id="themeToggleLogin" title="تبديل الوضع الليلي/النهاري">🌙</button>
+  <div class="login-card">
+    <div class="brand-mark">
+      <div class="logo-chip">F</div>
+      <div class="brand-title">First</div>
+    </div>
+    <div class="brand-sub">Fantasy Service Center</div>
+    <div id="loginForm">
+      <label>اسم المستخدم</label>
+      <select id="loginUserSelect">
+        <option value="">-- اختر المستخدم --</option>
+        <option value="__manual__">إدخال يدوي...</option>
+      </select>
+      <input type="text" id="loginUser" placeholder="اكتب اسم المستخدم" autocomplete="username" style="display:none; margin-top:8px;">
+      <label>كلمة المرور</label>
+      <input type="password" id="loginPass" placeholder="ادخل كلمة المرور" autocomplete="current-password" required>
+      <div class="login-err" id="loginErr"></div>
+      <button type="button" class="login-btn" id="loginBtn">تسجيل الدخول</button>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="logo-chip">F</div>
+      <div>
+        <div class="brand-title">First <span style="color:var(--text-3); font-weight:400; font-size:13px;">— Fantasy</span></div>
+        <div class="crumb" id="crumbBar">الرئيسية</div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="sync-badge" id="syncBadge"><span class="sync-dot off" id="syncDot"></span><span id="syncText">محلي فقط</span></div>
+      <button class="icon-btn" id="themeToggleApp" title="تبديل الوضع">🌙</button>
+      <div class="user-chip"><div class="avatar" id="userAvatar">A</div><span id="userNameLabel">أدمن</span></div>
+      <button class="logout-btn" id="logoutBtn">خروج</button>
+    </div>
+  </div>
+  <div id="viewRoot"></div>
+</div>
+
+<div class="modal-bg" id="modalBg">
+  <div class="modal" id="modalBox"></div>
+</div>
+<div class="toast" id="toast"><span class="t-dot"></span><span id="toastMsg"></span></div>
+<div id="printArea"></div>
+
+<script>
+/* ============ STATE (in-memory only, resets on reload) ============ */
+const state = {
+  loggedIn:false,
+  currentUser:null,
+  theme:'dark',
+  section:null,
+  module:'newInvoice',
+  seq:{invoice:1001, sale:501, ctrl:100},
+  partSeq:1,
+  customers:[],
+  parts:{
+    ps4:[],
+    ps5:[]
+  },
+  invoices:[],
+  ledger:[],
+  priceList:[],
+  users:[
+    {name:'أدمن', username:'admin', password:'2007', role:'مدير النظام (طوارئ)', admin:true, permissions:[]}
+  ],
+  sales:[],
+  deviceParts:[],
+  devicePartSeq:1,
+  deviceInvoices:[],
+  deviceSeq:{invoice:1, sale:1, dev:1},
+  deviceSales:[],
+  settings:{
+    shopPhone: '01147830303',
+    templates:{
+      intake: 'مرحبا بكم فى مركز صيانه فانتازى ستور فرع شارع بورسعيد\nبيانات الاستلام\nتم استلام اليوم عدد: {{ps4}} دراع فور و عدد {{ps5}} دراع فايف\nاسم العميل: {{customer}}\nرقم الهاتف: {{phone}}\nسيتم التواصل معكم فور الانتهاء من الصيانه\nشكرا لثقتكم بنا\nللتواصل مع مسئول الصيانه: {{shopPhone}}',
+      invoice: 'مرحباً {{customer}} 👋\nفاتورتك جاهزة، وده تفاصيلها:\nرقم الفاتورة: {{code}}\nاسم العميل: {{customer}}\nالهاتف: {{phone}}\nعدد الدراعات: {{controllers}}\nإجمالي الحساب: {{total}}\nشكراً لتعاملك مع First - Fantasy 🎮',
+      deviceIntake: 'مرحباً {{customer}} 👋\nتم استلام جهازك بمركز First - Fantasy لإجراء الصيانة.\nكود الفاتورة: {{code}}\nالتاريخ: {{date}}\nعدد الأجهزة: {{count}}\nسنتواصل معك فور الانتهاء 🙏',
+      deviceInvoice: 'مرحباً {{customer}} 👋\nفاتورتك جاهزة، وده تفاصيلها:\nرقم الفاتورة: {{code}}\nاسم العميل: {{customer}}\nالهاتف: {{phone}}\nعدد الأجهزة: {{count}}\nإجمالي الحساب: {{total}}\nشكراً لتعاملك مع First - Fantasy 🎮'
+    }
+  }
+};
+
+const controllerModules = [
+  {id:'newInvoice', label:'فاتورة جديدة', icon:'🧾'},
+  {id:'editInvoice', label:'تعديل فاتورة', icon:'✏️'},
+  {id:'priceList', label:'جدول أسعار', icon:'💳'},
+  {id:'parts', label:'قطع الغيار', icon:'📦'},
+  {id:'invoiceLog', label:'سجل الفواتير', icon:'📚'},
+  {id:'pending', label:'الفواتير المعلقة', icon:'⏳'},
+  {id:'delivery', label:'الاستلام والتسليم', icon:'🔁'},
+  {id:'customerAccounts', label:'حسابات العملاء', icon:'💰'},
+  {id:'reports', label:'التقارير', icon:'📈'},
+  {id:'stats', label:'الإحصائيات', icon:'📊'},
+  {id:'users', label:'إدارة المستخدمين', icon:'👥'},
+  {id:'sale', label:'فاتورة بيع', icon:'🛒'},
+  {id:'settings', label:'الإعدادات', icon:'⚙️'}
+];
+
+const deviceModules = [
+  {id:'dev_newInvoice', label:'استلام جديد', icon:'🧾'},
+  {id:'dev_editInvoice', label:'تعديل فاتورة', icon:'✏️'},
+  {id:'dev_pending', label:'الأجهزة المعلقة والتسليم', icon:'🔁'},
+  {id:'customerAccounts', label:'حسابات العملاء', icon:'💰'},
+  {id:'dev_invoiceLog', label:'سجل الفواتير', icon:'📚'},
+  {id:'dev_stats', label:'الإحصائيات والتقارير', icon:'📊'},
+  {id:'dev_parts', label:'الخدمات وقطع الغيار', icon:'📦'},
+  {id:'dev_sale', label:'فاتورة بيع', icon:'🛒'},
+  {id:'users', label:'إدارة المستخدمين', icon:'👥'}
+];
+
+const allModules = [...controllerModules, ...deviceModules.filter(m=> !controllerModules.find(cm=>cm.id===m.id))];
+
+function currentSectionModules(){
+  return state.section==='devices' ? deviceModules : controllerModules;
+}
+
+const statusMeta = {
+  repair:{label:'تحت الصيانة', cls:'badge-progress'},
+  fixed:{label:'تم الإصلاح', cls:'badge-ready'},
+  delivered_paid:{label:'تم التسليم مدفوع', cls:'badge-done'},
+  delivered_deferred:{label:'تم التسليم (أجل)', cls:'badge-wait'},
+  delivered_unpaid:{label:'تم التسليم غير مدفوع', cls:'badge-low'}
+};
+
+/* ============ UTIL ============ */
+function toast(msg){
+  const t = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  t.classList.add('show');
+  clearTimeout(window._tt);
+  window._tt = setTimeout(()=>t.classList.remove('show'), 2400);
+}
+function money(n){ return Number(n).toLocaleString('ar-EG') + ' ج.م'; }
+function openModal(html, wide){
+  const box = document.getElementById('modalBox');
+  box.className = 'modal' + (wide? ' modal-wide':'');
+  box.innerHTML = html;
+  document.getElementById('modalBg').classList.add('show');
+}
+function closeModal(){ document.getElementById('modalBg').classList.remove('show'); }
+document.getElementById('modalBg').addEventListener('click', e=>{ if(e.target.id==='modalBg') closeModal(); });
+
+function calcControllerSubtotal(c){ return c.items.reduce((s,i)=>s+i.price,0); }
+function calcInvoiceTotal(inv){ return inv.controllers.reduce((s,c)=>s+calcControllerSubtotal(c),0); }
+function calcDeviceSubtotal(d){ return d.items.reduce((s,i)=>s+i.price,0); }
+function calcDeviceInvoiceTotal(inv){ return inv.devices.reduce((s,d)=>s+calcDeviceSubtotal(d),0); }
+function recomputeDeviceInvoiceStatus(inv){
+  const total = inv.devices.length;
+  if(total===0){ inv.status='repair'; return; }
+  const delivered = inv.devices.filter(d=>d.delivered).length;
+  const allHaveWork = inv.devices.every(d=>d.items.length>0);
+  if(delivered===total){
+    if(inv.paymentType==='أجل') inv.status='delivered_deferred';
+    else if(inv.paymentType==='مدفوع') inv.status='delivered_paid';
+    else inv.status='delivered_unpaid';
+  } else if(allHaveWork){
+    inv.status='fixed';
+  } else {
+    inv.status='repair';
+  }
+}
+function todayStr(){ return new Date().toISOString().slice(0,10); }
+
+function applyTemplate(tpl, data){
+  return (tpl||'').replace(/\{\{(\w+)\}\}/g, (m,k)=> (data[k]!==undefined && data[k]!==null? data[k] : ''));
+}
+function sendWhatsApp(phone, message){
+  if(!phone){ toast('لا يوجد رقم هاتف لهذا العميل'); return; }
+  const clean = phone.replace(/[^0-9]/g,'');
+  const url = 'https://wa.me/' + clean + '?text=' + encodeURIComponent(message);
+  window.open(url, '_blank');
+}
+
+/* ============ CLOUD SYNC (Firebase Firestore) ============
+   1) روح https://console.firebase.google.com وأنشئ مشروع مجاني
+   2) من Build → Firestore Database → أنشئ قاعدة بيانات (Start in production mode)
+   3) من Project settings → Web App، هتلاقي كائن firebaseConfig زي اللي تحت — انسخه هنا
+   4) البيانات هتتخزن في مستند واحد: firstFantasy/mainData ومتاحة من أي جهاز بنفس الرابط
+============================================================ */
+const firebaseConfig = {
+  apiKey: "AIzaSyCgZNbL0yvVI3LnOCKiHWsPjDZWBkVGBMg",
+  authDomain: "first-b3dc9.firebaseapp.com",
+  projectId: "first-b3dc9",
+  storageBucket: "first-b3dc9.firebasestorage.app",
+  messagingSenderId: "852071620319",
+  appId: "1:852071620319:web:1f765026d1eb0e3d6d136a"
+};
+let cloudEnabled = false;
+let db = null;
+try{
+  if(firebaseConfig.apiKey && firebaseConfig.apiKey !== "YOUR_API_KEY" && typeof firebase !== 'undefined'){
+    firebase.initializeApp(firebaseConfig);
+    db = firebase.firestore();
+    cloudEnabled = true;
+  }
+}catch(e){ console.warn('Firebase init failed', e); cloudEnabled = false; }
+
+async function ensureAuth(){
+  if(!cloudEnabled) return false;
+  try{
+    if(!firebase.auth().currentUser){
+      await firebase.auth().signInAnonymously();
+    }
+    return true;
+  }catch(e){
+    console.error('Firebase auth failed', e);
+    setSyncStatus('off','فشل الاتصال بالسحابة');
+    return false;
+  }
+}
+
+function setSyncStatus(mode, text){
+  const dot = document.getElementById('syncDot');
+  const label = document.getElementById('syncText');
+  if(!dot || !label) return;
+  dot.className = 'sync-dot ' + mode;
+  label.textContent = text;
+}
+if(cloudEnabled) setSyncStatus('busy','جاري الاتصال...'); else setSyncStatus('off','محلي فقط (لم تُربط بعد)');
+
+function persistablePayload(){
+  return {
+    customers: state.customers, parts: state.parts, invoices: state.invoices,
+    ledger: state.ledger, priceList: state.priceList, users: state.users,
+    sales: state.sales, settings: state.settings, seq: state.seq, partSeq: state.partSeq,
+    deviceParts: state.deviceParts, devicePartSeq: state.devicePartSeq,
+    deviceInvoices: state.deviceInvoices, deviceSeq: state.deviceSeq, deviceSales: state.deviceSales,
+    updatedAt: new Date().toISOString()
+  };
+}
+let saveTimer = null;
+function scheduleSave(){
+  if(!cloudEnabled) return;
+  setSyncStatus('busy','جاري الحفظ...');
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(saveToCloud, 1200);
+}
+async function saveToCloud(){
+  if(!cloudEnabled) return;
+  try{
+    await db.collection('firstFantasy').doc('mainData').set(persistablePayload());
+    setSyncStatus('on','تم الحفظ ✓');
+  }catch(e){
+    console.error(e);
+    setSyncStatus('off','فشل الحفظ ⚠️');
+  }
+}
+function applyExternalPayload(d){
+  Object.assign(state, {
+    customers:d.customers||state.customers, parts:d.parts||state.parts, invoices:d.invoices||state.invoices,
+    ledger:d.ledger||state.ledger, priceList:d.priceList||state.priceList, users:d.users||state.users,
+    sales:d.sales||state.sales, settings:d.settings||state.settings, seq:d.seq||state.seq, partSeq:d.partSeq||state.partSeq,
+    deviceParts:d.deviceParts||state.deviceParts, devicePartSeq:d.devicePartSeq||state.devicePartSeq,
+    deviceInvoices:d.deviceInvoices||state.deviceInvoices, deviceSeq:d.deviceSeq||state.deviceSeq, deviceSales:d.deviceSales||state.deviceSales
+  });
+}
+
+async function loadFromCloud(){
+  if(!cloudEnabled) return false;
+  try{
+    setSyncStatus('busy','جاري التحميل...');
+    const doc = await db.collection('firstFantasy').doc('mainData').get();
+    if(doc.exists){
+      applyExternalPayload(doc.data());
+      setSyncStatus('on','متصل بالسحابة');
+      return true;
+    }
+    setSyncStatus('on','متصل بالسحابة (لا بيانات محفوظة بعد)');
+  }catch(e){
+    console.error(e);
+    setSyncStatus('off','تعذر الاتصال بالسحابة');
+  }
+  return false;
+}
+if(cloudEnabled){
+  setInterval(saveToCloud, 8000);
+  window.addEventListener('beforeunload', ()=>{ if(cloudEnabled) navigator.sendBeacon && saveToCloud(); });
+}
+
+/* ---------- نسخ احتياطية داخل Firebase نفسه (مجموعة منفصلة عن البيانات الحية) ---------- */
+async function saveSnapshot(label){
+  if(!cloudEnabled){ toast('لازم تربط الموقع بـ Firebase أولاً'); return; }
+  try{
+    const payload = persistablePayload();
+    payload.label = label || ('نسخة يدوية — ' + todayStr());
+    await db.collection('firstFantasy_backups').add(payload);
+    toast('تم حفظ نسخة احتياطية على Firebase');
+  }catch(e){ console.error(e); toast('فشل حفظ النسخة الاحتياطية'); }
+}
+async function listSnapshots(){
+  if(!cloudEnabled) return [];
+  try{
+    const snap = await db.collection('firstFantasy_backups').orderBy('updatedAt','desc').limit(20).get();
+    return snap.docs.map(d=>({id:d.id, ...d.data()}));
+  }catch(e){ console.error(e); return []; }
+}
+async function restoreSnapshot(id){
+  if(!cloudEnabled) return;
+  try{
+    const doc = await db.collection('firstFantasy_backups').doc(id).get();
+    if(doc.exists){
+      applyExternalPayload(doc.data());
+      await saveToCloud();
+      toast('تم استعادة النسخة واعتمادها كبيانات حالية');
+      if(state.loggedIn) renderModuleShell();
+    }
+  }catch(e){ console.error(e); toast('فشل استرجاع النسخة'); }
+}
+async function autoDailySnapshot(){
+  if(!cloudEnabled) return;
+  try{
+    const todayId = 'auto-' + todayStr();
+    const existing = await db.collection('firstFantasy_backups').doc(todayId).get();
+    if(!existing.exists){
+      const payload = persistablePayload();
+      payload.label = 'نسخة تلقائية يومية — ' + todayStr();
+      await db.collection('firstFantasy_backups').doc(todayId).set(payload);
+    }
+  }catch(e){ console.error(e); }
+}
+
+/* ---------- نسخة احتياطية يدوية (JSON) — تعمل بدون سحابة أيضاً ---------- */
+function exportBackup(){
+  const payload = persistablePayload();
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'first-fantasy-backup-' + todayStr() + '.json';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast('تم تنزيل النسخة الاحتياطية');
+}
+function importBackupFile(file){
+  const reader = new FileReader();
+  reader.onload = e=>{
+    try{
+      const d = JSON.parse(e.target.result);
+      applyExternalPayload(d);
+      toast('تم استيراد النسخة الاحتياطية بنجاح');
+      scheduleSave();
+      if(state.loggedIn) renderModuleShell();
+    }catch(err){ toast('ملف النسخة الاحتياطية غير صالح'); }
+  };
+  reader.readAsText(file);
+}
+
+async function factoryResetAllData(){
+  state.customers = [];
+  state.parts = {ps4:[], ps5:[]};
+  state.invoices = [];
+  state.ledger = [];
+  state.priceList = [];
+  state.sales = [];
+  state.seq = {invoice:1001, sale:501, ctrl:100};
+  state.partSeq = 1;
+  state.deviceParts = [];
+  state.devicePartSeq = 1;
+  state.deviceInvoices = [];
+  state.deviceSeq = {invoice:1, sale:1, dev:1};
+  state.deviceSales = [];
+  state.users = [{name:'أدمن', username:'admin', password:'2007', role:'مدير النظام (طوارئ)', admin:true, permissions:[]}];
+  if(cloudEnabled){ await saveToCloud(); }
+  toast('تم مسح كل البيانات والبدء من جديد');
+}
+
+function printReceipt(h){
+  document.getElementById('printArea').innerHTML = `
+    <div style="width:76mm; margin:0 auto; font-family:'Courier New',monospace; color:#000; direction:rtl; font-size:11.5px; line-height:1.8;">
+      <div style="text-align:center; margin-bottom:8px;">
+        <div style="font-size:15px; font-weight:900;">First — Fantasy</div>
+        <div>ريسيت استلام صيانة دراعات</div>
+      </div>
+      <div style="border-top:1px dashed #000; margin:6px 0;"></div>
+      <div>كود الفاتورة: ${h.id}</div>
+      <div>التاريخ: ${h.date}</div>
+      <div>نوع الفاتورة: ${h.type}</div>
+      <div>اسم العميل: ${h.customer}</div>
+      <div>رقم الهاتف: ${h.phone || '—'}</div>
+      <div>عدد دراعات فايف: ${h.countPS5}</div>
+      <div>عدد دراعات فور: ${h.countPS4}</div>
+      <div style="border-top:1px dashed #000; margin:8px 0;"></div>
+      <div style="font-size:10.5px;">تم استلام الدراعات المذكورة أعلاه لإجراء الصيانة اللازمة. يرجى الاحتفاظ بهذا الإيصال لحين استلام الدراعات.</div>
+    </div>
+  `;
+  window.print();
+}
+
+function printControllerTicket(customer, refNumber, code){
+  document.getElementById('printArea').innerHTML = `
+    <div style="width:250px; margin:0 auto; border:2px solid #000; border-radius:4px; padding:8px 12px 10px; font-family:sans-serif; direction:rtl; color:#000;">
+      <div style="text-align:center; font-weight:bold; font-size:12px; border-bottom:1.5px solid #000; padding-bottom:6px; margin-bottom:8px; line-height:1.6;">
+        مركز فرست لصيانة البلايستيشن<br>${state.settings.shopPhone||''}
+      </div>
+      <div style="font-size:11.5px; line-height:2.1;">
+        <div>الاسم : ${customer || '..........................'}</div>
+        <div>الرقم : ${refNumber || '..........................'}</div>
+        <div>الكود : ${code || '..........................'}</div>
+      </div>
+    </div>
+  `;
+  window.print();
+}
+
+function printDeviceBarcode(customer, phone, code){
+  const barcodeValue = (code && code.trim()) ? code.trim() : 'DEV-' + Date.now();
+  document.getElementById('printArea').innerHTML = `
+    <div style="width:260px; margin:0 auto; border:2px solid #000; border-radius:4px; padding:10px 12px; font-family:sans-serif; direction:rtl; color:#000; text-align:center;">
+      <div style="font-weight:bold; font-size:12px; border-bottom:1.5px solid #000; padding-bottom:6px; margin-bottom:8px; line-height:1.6;">
+        مركز فرست لصيانة البلايستيشن<br>${state.settings.shopPhone||''}
+      </div>
+      <svg id="barcodeSvg" style="max-width:100%;"></svg>
+      <div style="font-size:11px; line-height:1.9; text-align:right; margin-top:6px;">
+        <div>الاسم : ${customer || '—'}</div>
+        <div>الهاتف : ${phone || '—'}</div>
+        <div>الكود : ${code || '—'}</div>
+      </div>
+    </div>
+  `;
+  try{
+    JsBarcode('#barcodeSvg', barcodeValue, {format:'CODE128', width:1.6, height:42, fontSize:11, margin:4});
+  }catch(e){ console.error('Barcode generation failed', e); }
+  window.print();
+}
+
+/* ---------- عرض / تصدير الفاتورة كاملة (عرض 80مم) ---------- */
+function buildInvoiceViewHTML(inv){
+  const total = calcInvoiceTotal(inv);
+  const paid = inv.paid||0;
+  const due = inv.due!=null? inv.due : total;
+  const discount = inv.discount||0;
+  const discountPercent = inv.discountPercent||0;
+  const rows = inv.controllers.map(c=>{
+    const sub = calcControllerSubtotal(c);
+    const itemsText = c.items.length
+      ? c.items.map(it=> it.name + (it.side? ` (${it.side})` : '') + (it.kind==='service'? ' 🛠️':'')).join('، ')
+      : 'لا توجد أصناف';
+    return `
+      <div style="margin-bottom:6px; padding-bottom:6px; border-bottom:1px dashed #000;">
+        <div style="font-weight:bold;">${c.console==='ps5'?'فايف':'فور'} — ${c.code||'—'}</div>
+        <div style="font-size:10.5px; color:#333; margin:2px 0;">${itemsText}</div>
+        <div style="display:flex; justify-content:space-between; font-weight:600;"><span>إجمالي الدراع</span><span>${money(sub)}</span></div>
+      </div>`;
+  }).join('');
+  return `
+    <div style="width:76mm; margin:0 auto; font-family:'Courier New',monospace; color:#000; direction:rtl; font-size:11.5px; line-height:1.7;">
+      <div style="text-align:center; margin-bottom:8px;">
+        <div style="font-size:15px; font-weight:900;">First — Fantasy</div>
+        <div>مركز صيانة بلايستيشن</div>
+        <div>${state.settings.shopPhone||''}</div>
+      </div>
+      <div style="border-top:1px dashed #000; margin:6px 0;"></div>
+      <div>فاتورة: ${inv.id}</div>
+      <div>التاريخ: ${inv.date}</div>
+      <div>العميل: ${inv.customer}</div>
+      <div>الهاتف: ${inv.phone||'—'}</div>
+      <div>النوع: ${inv.type}</div>
+      <div>الحالة: ${statusMeta[inv.status].label}</div>
+      <div style="border-top:1px dashed #000; margin:6px 0;"></div>
+      ${rows || '<div style="text-align:center; color:#777; padding:8px 0;">لا توجد أصناف مسجلة</div>'}
+      <div style="border-top:1px dashed #000; margin:6px 0;"></div>
+      <div style="display:flex; justify-content:space-between; font-weight:900; font-size:13px;"><span>الإجمالي</span><span>${money(total)}</span></div>
+      <div style="display:flex; justify-content:space-between;"><span>المدفوع</span><span>${money(paid)}</span></div>
+      <div style="display:flex; justify-content:space-between;"><span>المتبقي</span><span>${money(due)}</span></div>
+      ${discount>0? `<div style="display:flex; justify-content:space-between;"><span>الخصم</span><span>${money(discount)} (${discountPercent}%)</span></div>`:''}
+      <div style="border-top:1px dashed #000; margin:8px 0;"></div>
+      <div style="text-align:center; font-size:10.5px;">شكراً لزيارتكم — First Fantasy Service</div>
+    </div>`;
+}
+function openInvoiceViewModal(inv){
+  openModal(`
+    <h3>معاينة الفاتورة ${inv.id}</h3>
+    <div style="background:#fff; border-radius:10px; padding:16px;">${buildInvoiceViewHTML(inv)}</div>
+    <div class="modal-actions"><button class="btn btn-ghost" type="button" onclick="closeModal()">إغلاق</button></div>
+  `, true);
+}
+function exportInvoicePDF(inv){
+  document.getElementById('printArea').innerHTML = buildInvoiceViewHTML(inv);
+  window.print();
+}
+
+/* ============ THEME ============ */
+function applyTheme(t){
+  state.theme = t;
+  document.documentElement.setAttribute('data-theme', t);
+  const icon = t === 'dark' ? '☀️' : '🌙';
+  const a = document.getElementById('themeToggleApp'); if(a) a.textContent = icon;
+  const l = document.getElementById('themeToggleLogin'); if(l) l.textContent = icon;
+}
+document.getElementById('themeToggleLogin').addEventListener('click', ()=> applyTheme(state.theme==='dark'?'light':'dark'));
+document.getElementById('themeToggleApp').addEventListener('click', ()=> applyTheme(state.theme==='dark'?'light':'dark'));
+
+/* ============ LOGIN ============ */
+function populateLoginUserSelect(){
+  const sel = document.getElementById('loginUserSelect');
+  if(!sel) return;
+  const list = state.users.filter(u=>u.username!=='admin');
+  sel.innerHTML = '<option value="">-- اختر المستخدم --</option>' +
+    list.map(u=>`<option value="${u.username}">${u.name}</option>`).join('') +
+    '<option value="__manual__">إدخال يدوي...</option>';
+  document.getElementById('loginUser').style.display = 'none';
+  document.getElementById('loginUser').value = '';
+}
+document.getElementById('loginUserSelect').addEventListener('change', function(){
+  const manual = document.getElementById('loginUser');
+  if(this.value==='__manual__'){ manual.style.display='block'; manual.value=''; manual.focus(); }
+  else { manual.style.display='none'; manual.value=''; }
+});
+function effectiveLoginUsername(){
+  const sel = document.getElementById('loginUserSelect').value;
+  if(sel==='__manual__') return document.getElementById('loginUser').value.trim();
+  return sel;
+}
+function doLogin(){
+  const u = effectiveLoginUsername();
+  const p = document.getElementById('loginPass').value.trim();
+  const err = document.getElementById('loginErr');
+  if(!u || !p){ err.textContent='من فضلك اختر المستخدم وأدخل كلمة المرور'; return; }
+  const match = state.users.find(usr=>usr.username===u && usr.password===p);
+  if(!match){ err.textContent='بيانات الدخول غير صحيحة'; return; }
+  err.textContent='';
+  state.loggedIn = true;
+  state.currentUser = match;
+  document.getElementById('userNameLabel').textContent = match.name;
+  document.getElementById('userAvatar').textContent = match.name.trim()[0].toUpperCase();
+  document.getElementById('loginWrap').style.display='none';
+  document.getElementById('app').style.display='block';
+  renderSectionPicker();
+  toast('تم تسجيل الدخول بنجاح، أهلاً ' + match.name);
+}
+document.getElementById('loginBtn').addEventListener('click', doLogin);
+document.getElementById('loginPass').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
+document.getElementById('loginUser').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
+function doLogoutSilently(){
+  state.loggedIn=false; state.section=null; state.currentUser=null;
+  document.getElementById('app').style.display='none';
+  document.getElementById('loginWrap').style.display='flex';
+  document.getElementById('loginUserSelect').value='';
+  document.getElementById('loginUser').value='';
+  document.getElementById('loginUser').style.display='none';
+  document.getElementById('loginPass').value='';
+  document.getElementById('loginErr').textContent='';
+  populateLoginUserSelect();
+}
+document.getElementById('logoutBtn').addEventListener('click', doLogoutSilently);
+
+
+/* ============ ROUTING / RENDER ============ */
+const root = document.getElementById('viewRoot');
+const crumb = document.getElementById('crumbBar');
+
+function visibleModules(){
+  const cu = state.currentUser;
+  if(!cu) return [];
+  return currentSectionModules().filter(m => cu.admin || (cu.permissions||[]).includes(m.id));
+}
+
+function renderSectionPicker(){
+  state.section=null;
+  crumb.innerHTML = '<b>الرئيسية</b>';
+  root.innerHTML = `
+  <div class="view">
+    <div class="hero-title">اختر قسم الصيانة</div>
+    <div class="hero-sub">مركز فيرست لصيانة أجهزة وأدرعة البلايستيشن — تابع لشركة Fantasy</div>
+    <div class="section-grid">
+      <div class="section-card" id="pickControllers">
+        <div class="sc-icon">🎮</div>
+        <h3>صيانة دراعات</h3>
+        <p>فواتير الإصلاح، جدول الأسعار، قطع الغيار، الاستلام والتسليم، والتقارير الخاصة بصيانة دراعات التحكم.</p>
+        <div class="sc-arrow">←</div>
+      </div>
+      <div class="section-card" id="pickDevices">
+        <div class="sc-icon">🖥️</div>
+        <h3>صيانة أجهزة</h3>
+        <p>استلام الأجهزة، تعديل الفواتير، تسليم الأجهزة، حسابات العملاء، والخدمات وقطع الغيار الخاصة بصيانة الأجهزة.</p>
+        <div class="sc-arrow">←</div>
+      </div>
+    </div>
+  </div>`;
+  document.getElementById('pickControllers').addEventListener('click', ()=>{
+    state.section='controllers';
+    const vis = visibleModules();
+    state.module = vis.length? vis[0].id : null;
+    renderModuleShell();
+  });
+  document.getElementById('pickDevices').addEventListener('click', ()=>{
+    state.section='devices';
+    const vis = visibleModules();
+    state.module = vis.length? vis[0].id : null;
+    renderModuleShell();
+  });
+}
+
+function renderModuleShell(){
+  const sectionLabel = state.section==='devices' ? 'صيانة أجهزة' : 'صيانة دراعات';
+  crumb.innerHTML = `<span style="cursor:pointer" id="crumbHome">الرئيسية</span> ← <b>${sectionLabel}</b>`;
+  const vis = visibleModules();
+  if(!vis.find(m=>m.id===state.module)) state.module = vis.length? vis[0].id : null;
+  root.innerHTML = `
+  <div class="view">
+    <div class="module-shell">
+      <div class="side-nav" id="sideNav"></div>
+      <div class="panel" id="panelContent"></div>
+    </div>
+  </div>`;
+  document.getElementById('crumbHome').addEventListener('click', renderSectionPicker);
+  const nav = document.getElementById('sideNav');
+  nav.innerHTML = vis.map(m => `<button data-m="${m.id}" class="${state.module===m.id?'active':''}"><span class="sn-icon">${m.icon}</span>${m.label}</button>`).join('');
+  nav.querySelectorAll('button').forEach(b=>{
+    b.addEventListener('click', ()=>{ state.module = b.dataset.m; renderModuleShell(); });
+  });
+  if(state.module){ renderModule(); }
+  else { document.getElementById('panelContent').innerHTML = '<div class="empty-state"><div class="es-icon">🚫</div>ليس لديك صلاحية للوصول لأي صفحة داخل هذا القسم</div>'; }
+}
+
+function renderModule(){
+  const panel = document.getElementById('panelContent');
+  const renderers = {
+    newInvoice: p=>buildInvoiceEditor(p, null, ()=>{ state.module='invoiceLog'; renderModuleShell(); }),
+    editInvoice: renderEditInvoice,
+    priceList: renderPriceList,
+    parts: renderParts,
+    invoiceLog: renderInvoiceLog,
+    pending: renderPending,
+    delivery: renderDelivery,
+    customerAccounts: renderCustomerAccounts,
+    reports: renderReports,
+    stats: renderStats,
+    users: renderUsers,
+    sale: renderSale,
+    settings: renderSettings,
+    dev_newInvoice: p=>buildDeviceInvoiceEditor(p, null, ()=>{ state.module='dev_invoiceLog'; renderModuleShell(); }),
+    dev_editInvoice: renderDeviceEditInvoice,
+    dev_pending: renderDevicePending,
+    dev_invoiceLog: renderDeviceInvoiceLog,
+    dev_stats: renderDeviceStats,
+    dev_parts: renderDeviceParts,
+    dev_sale: renderDeviceSale
+  };
+  panel.innerHTML='';
+  const fallback = state.section==='devices' ? renderers.dev_newInvoice : renderers.newInvoice;
+  (renderers[state.module] || fallback)(panel);
+}
+
+/* ---------- فاتورة جديدة / تعديل فاتورة (محرر مشترك) ---------- */
+function buildInvoiceEditor(panel, existingInvoice, onSavedFinal){
+  let inv = existingInvoice || null;
+  let h = existingInvoice || { id:'INV-'+(state.seq.invoice), type:'قطاعي', date:new Date().toISOString().slice(0,10), customer:'', phone:'', countPS4:0, countPS5:0 };
+
+  paint();
+
+  function paint(){
+    const saved = !!inv;
+    panel.innerHTML = `
+      <div class="panel-head"><div><h2>🧾 ${existingInvoice? 'تعديل فاتورة '+h.id : 'فاتورة صيانة جديدة'}</h2><div class="ph-sub">${saved? 'الفاتورة محفوظة — يمكنك إضافة الدراعات بالأسفل':'أدخل بيانات العميل والاستلام أولاً'}</div></div></div>
+      <div class="seg-toggle" style="max-width:280px;margin-bottom:16px;">
+        <button type="button" data-type="قطاعي" class="${h.type==='قطاعي'?'active':''}">قطاعي</button>
+        <button type="button" data-type="تجاري" class="${h.type==='تجاري'?'active':''}">تجاري</button>
+      </div>
+      <div class="form-grid">
+        <div class="field"><label>كود الفاتورة</label><input id="h_code" value="${h.id}"></div>
+        <div class="field"><label>التاريخ</label><input type="date" id="h_date" value="${h.date}"></div>
+        <div class="field"><label>اسم العميل</label><input id="h_customer" list="customerList" value="${h.customer}" placeholder="اكتب اسم أو اختر عميل سابق"></div>
+        <div class="field"><label>رقم الهاتف (اختياري)</label><input id="h_phone" value="${h.phone}" placeholder="01xxxxxxxxx"></div>
+        <div class="field"><label>عدد دراعات فايف (PS5)</label><input type="number" min="0" id="h_ps5" value="${h.countPS5}"></div>
+        <div class="field"><label>عدد دراعات فور (PS4)</label><input type="number" min="0" id="h_ps4" value="${h.countPS4}"></div>
+      </div>
+      <datalist id="customerList">${state.customers.map(c=>`<option value="${c.name}">`).join('')}</datalist>
+      <div style="display:flex; gap:10px; margin:18px 0 6px; flex-wrap:wrap;">
+        <button class="btn btn-ghost" type="button" id="printReceiptBtn">🖨️ طباعة ريسيت استلام</button>
+        <button class="btn btn-primary" type="button" id="saveHeaderBtn">💾 ${saved? 'تحديث بيانات الاستلام':'حفظ بيانات الاستلام'}</button>
+        ${saved? '<button class="btn btn-ghost" type="button" id="sendIntakeBtn">📲 إرسال رسالة الاستلام</button>' : ''}
+      </div>
+      ${saved ? controllersHTML() : '<div class="empty-state"><div class="es-icon">🎮</div>احفظ بيانات الاستلام أولاً لتتمكن من إضافة الدراعات</div>'}
+    `;
+    wireHeader();
+    if(saved) wireControllers();
+  }
+
+  function controllersHTML(){
+    const total = calcInvoiceTotal(inv);
+    return `
+    <div style="margin-top:24px; border-top:1px solid var(--border); padding-top:18px;">
+      <div class="panel-head">
+        <div><h3>🎮 دراعات هذه الفاتورة</h3><div class="ph-sub">أضف كل دراع، ثم حدد القطع والخدمات المستخدمة فيه</div></div>
+        <button class="btn btn-primary btn-sm" type="button" id="addCtrlBtn">➕ إضافة دراع</button>
+      </div>
+      <div id="ctrlList">
+        ${inv.controllers.length? inv.controllers.map(c=>controllerCardHTML(c)).join('') : '<div class="empty-state"><div class="es-icon">🎮</div>لا يوجد دراعات مضافة بعد</div>'}
+      </div>
+      <div class="grand-total"><span>الإجمالي الكلي</span><span>${money(total)}</span></div>
+      <div style="display:flex; gap:10px; margin-top:16px;">
+        <button class="btn btn-primary" type="button" id="finalSaveBtn" style="flex:1;">✅ حفظ الفاتورة وإنهاء</button>
+        ${existingInvoice? '<button class="btn btn-danger" type="button" id="deleteInvBtn">🗑️ حذف الفاتورة</button>' : ''}
+      </div>
+    </div>`;
+  }
+
+  function controllerCardHTML(c){
+    const sub = calcControllerSubtotal(c);
+    return `
+    <div class="controller-card">
+      <div class="cc-head">
+        <div class="cc-title"><span class="console-badge console-${c.console}">${c.console==='ps5'?'فايف':'فور'}</span> كود الدراع: ${c.code||'—'} ${c.delivered? '<span class="badge badge-done" style="margin-right:6px;">تم التسليم</span>':''}</div>
+        <div style="display:flex; gap:6px;">
+          <button class="btn btn-ghost btn-sm" type="button" data-editctrl="${c.uid}">✏️ تعديل</button>
+          <button class="btn btn-danger btn-sm" type="button" data-delctrl="${c.uid}">حذف الدراع</button>
+        </div>
+      </div>
+      ${c.items.length? c.items.map((it,ix)=>`
+        <div class="item-row">
+          <div>${it.kind==='service'?'🛠️':'🔩'} ${it.name}${it.side?`<span class="ir-side">(${it.side})</span>`:''}</div>
+          <div><span class="ir-price">${money(it.price)}</span><span class="item-del" data-delitem="${c.uid}:${ix}">✖</span></div>
+        </div>`).join('') : '<div style="color:var(--text-3); font-size:12.5px; padding:6px 0;">لم تتم إضافة قطع أو خدمات بعد</div>'}
+      <div class="cc-sub"><span>إجمالي الدراع</span><span>${money(sub)}</span></div>
+      <div class="cc-actions">
+        <button class="btn btn-ghost btn-sm" type="button" data-addpart="${c.uid}">➕ إضافة قطعة</button>
+        <button class="btn btn-ghost btn-sm" type="button" data-addservice="${c.uid}">➕ إضافة خدمة</button>
+        <button class="btn btn-ghost btn-sm" type="button" data-printtag="${c.uid}">🖨️ إعادة طباعة التيكت</button>
+      </div>
+    </div>`;
+  }
+
+  function wireHeader(){
+    panel.querySelectorAll('.seg-toggle button').forEach(b=>{
+      b.addEventListener('click', ()=>{ h.type=b.dataset.type; if(inv) inv.type=h.type; paint(); });
+    });
+    const custInput = document.getElementById('h_customer');
+    custInput.addEventListener('change', ()=>{
+      const match = state.customers.find(c=>c.name===custInput.value.trim());
+      if(match) document.getElementById('h_phone').value = match.phone;
+    });
+    document.getElementById('printReceiptBtn').addEventListener('click', ()=>{
+      readHeader();
+      if(!h.customer){ toast('من فضلك أدخل اسم العميل أولاً'); return; }
+      printReceipt(h);
+    });
+    document.getElementById('saveHeaderBtn').addEventListener('click', ()=>{
+      readHeader();
+      if(!h.customer){ toast('من فضلك أدخل اسم العميل أولاً'); return; }
+      if(!state.customers.find(c=>c.name===h.customer)) state.customers.push({name:h.customer, phone:h.phone});
+      if(!inv){
+        if(state.invoices.find(x=>x.id===h.id)){
+          let n = state.seq.invoice, candidate;
+          do { n++; candidate = 'INV-' + n; } while(state.invoices.find(x=>x.id===candidate));
+          h.id = candidate;
+        }
+        inv = h; inv.controllers=[]; inv.status='repair';
+        inv.paid=0; inv.due=0; inv.discount=0; inv.discountPercent=0; inv.paymentType=null;
+        state.invoices.unshift(inv);
+        const usedNum = parseInt(String(h.id).replace(/\D/g,''))||0;
+        state.seq.invoice = Math.max(state.seq.invoice, usedNum) + 1;
+        toast('تم حفظ بيانات الاستلام، أضف الدراعات بالأسفل');
+      } else {
+        toast('تم تحديث بيانات الفاتورة');
+      }
+      scheduleSave();
+      paint();
+    });
+    if(inv){
+      const sendBtn = document.getElementById('sendIntakeBtn');
+      if(sendBtn) sendBtn.addEventListener('click', ()=>{
+        const data = {customer:h.customer, code:h.id, date:h.date, type:h.type, ps4:h.countPS4, ps5:h.countPS5, phone:h.phone, shopPhone:state.settings.shopPhone};
+        const msg = applyTemplate(state.settings.templates.intake, data);
+        sendWhatsApp(h.phone, msg);
+      });
+    }
+  }
+
+  function readHeader(){
+    h.id = document.getElementById('h_code').value.trim() || h.id;
+    h.date = document.getElementById('h_date').value || h.date;
+    h.customer = document.getElementById('h_customer').value.trim();
+    h.phone = document.getElementById('h_phone').value.trim();
+    h.countPS5 = Number(document.getElementById('h_ps5').value)||0;
+    h.countPS4 = Number(document.getElementById('h_ps4').value)||0;
+  }
+
+  function wireControllers(){
+    document.getElementById('addCtrlBtn').addEventListener('click', openAddControllerModal);
+    document.getElementById('finalSaveBtn').addEventListener('click', ()=>{
+      toast('تم حفظ الفاتورة ' + inv.id + ' بنجاح ✅');
+      saveToCloud();
+      if(onSavedFinal) onSavedFinal();
+    });
+    const delBtn = document.getElementById('deleteInvBtn');
+    if(delBtn) delBtn.addEventListener('click', ()=>{
+      if(!confirm('متأكد من حذف الفاتورة ' + inv.id + ' نهائيًا؟')) return;
+      deleteInvoiceById(inv.id);
+      toast('تم حذف الفاتورة');
+      if(onSavedFinal) onSavedFinal();
+    });
+    panel.querySelectorAll('[data-delctrl]').forEach(b=>{
+      b.addEventListener('click', ()=>{ inv.controllers = inv.controllers.filter(c=>c.uid!=b.dataset.delctrl); paint(); scheduleSave(); });
+    });
+    panel.querySelectorAll('[data-editctrl]').forEach(b=>{
+      b.addEventListener('click', ()=> openEditControllerModal(inv.controllers.find(c=>c.uid==b.dataset.editctrl)));
+    });
+    panel.querySelectorAll('[data-delitem]').forEach(b=>{
+      b.addEventListener('click', ()=>{
+        const [uid,ix] = b.dataset.delitem.split(':');
+        const c = inv.controllers.find(x=>x.uid==uid);
+        c.items.splice(Number(ix),1); paint(); scheduleSave();
+      });
+    });
+    panel.querySelectorAll('[data-addpart]').forEach(b=>{
+      b.addEventListener('click', ()=> openAddPartModal(inv.controllers.find(c=>c.uid==b.dataset.addpart)));
+    });
+    panel.querySelectorAll('[data-addservice]').forEach(b=>{
+      b.addEventListener('click', ()=> openAddServiceModal(inv.controllers.find(c=>c.uid==b.dataset.addservice)));
+    });
+    panel.querySelectorAll('[data-printtag]').forEach(b=>{
+      b.addEventListener('click', ()=>{
+        const c = inv.controllers.find(x=>x.uid==b.dataset.printtag);
+        printControllerTicket(h.customer, h.phone, c.code);
+      });
+    });
+  }
+
+  function openAddControllerModal(){
+    openModal(`
+      <h3>إضافة دراع جديد</h3>
+      <div class="field" style="margin-bottom:12px;"><label>نوع الدراع</label>
+        <select id="ac_console"><option value="ps5">فايف (PS5)</option><option value="ps4">فور (PS4)</option></select>
+      </div>
+      <div class="field"><label>كود الدراع</label>
+        <div style="display:flex; gap:8px;">
+          <input id="ac_code" placeholder="مثال: C-01" style="flex:1;">
+          <button class="btn btn-ghost btn-sm" type="button" id="ac_print" title="طباعة تيكت للصق على الدراع">🖨️</button>
+        </div>
+      </div>
+      <div class="modal-actions"><button class="btn btn-ghost" type="button" onclick="closeModal()">إلغاء</button><button class="btn btn-primary" type="button" id="ac_save">إضافة</button></div>
+    `);
+    document.getElementById('ac_print').addEventListener('click', ()=>{
+      const code = document.getElementById('ac_code').value.trim();
+      printControllerTicket(h.customer, h.phone, code);
+    });
+    document.getElementById('ac_save').addEventListener('click', ()=>{
+      inv.controllers.push({uid: state.seq.ctrl++, console: document.getElementById('ac_console').value, code: document.getElementById('ac_code').value.trim(), items:[], delivered:false, deliveredAt:null});
+      closeModal(); paint(); scheduleSave();
+    });
+  }
+
+  function openEditControllerModal(c){
+    if(!c) return;
+    openModal(`
+      <h3>تعديل بيانات الدراع</h3>
+      <div class="field" style="margin-bottom:12px;"><label>نوع الدراع</label>
+        <select id="ec_console">
+          <option value="ps5" ${c.console==='ps5'?'selected':''}>فايف (PS5)</option>
+          <option value="ps4" ${c.console==='ps4'?'selected':''}>فور (PS4)</option>
+        </select>
+      </div>
+      <div class="field"><label>كود الدراع</label><input id="ec_code" value="${c.code||''}" placeholder="مثال: C-01"></div>
+      <div class="modal-actions"><button class="btn btn-ghost" type="button" onclick="closeModal()">إلغاء</button><button class="btn btn-primary" type="button" id="ec_save">حفظ التعديلات</button></div>
+    `);
+    document.getElementById('ec_save').addEventListener('click', ()=>{
+      c.console = document.getElementById('ec_console').value;
+      c.code = document.getElementById('ec_code').value.trim();
+      closeModal(); paint(); scheduleSave();
+      toast('تم تحديث بيانات الدراع');
+    });
+  }
+
+  function openAddPartModal(ctrl){
+    const list = state.parts[ctrl.console] || [];
+    const rows = list.map(p=>{
+      const price = h.type==='تجاري'? p.commercial : p.retail;
+      if(p.type==='dual'){
+        return `<div class="cb-item"><span>${p.name}<br><span style="color:var(--text-3); font-size:11.5px;">${money(price)}</span></span>
+          <span class="cb-side-group">
+            <label><input type="checkbox" data-part="${p.id}" data-side="${p.labelA}"> ${p.labelA}</label>
+            <label><input type="checkbox" data-part="${p.id}" data-side="${p.labelB}"> ${p.labelB}</label>
+          </span></div>`;
+      }
+      return `<div class="cb-item"><label><input type="checkbox" data-part="${p.id}" data-side=""> ${p.name}</label><span style="color:var(--text-3); font-size:12px;">${money(price)}</span></div>`;
+    }).join('') || '<div class="empty-state">لا توجد قطع غيار مسجلة لهذا النوع</div>';
+    openModal(`
+      <h3>إضافة قطعة غيار — ${ctrl.console==='ps5'?'فايف':'فور'}</h3>
+      <div class="checkbox-list">${rows}</div>
+      <div class="modal-actions"><button class="btn btn-ghost" type="button" onclick="closeModal()">إلغاء</button><button class="btn btn-primary" type="button" id="ap_save">إضافة المحدد</button></div>
+    `);
+    document.getElementById('ap_save').addEventListener('click', ()=>{
+      document.querySelectorAll('#modalBox input[type=checkbox]:checked').forEach(cb=>{
+        const part = list.find(p=>p.id==cb.dataset.part);
+        const price = h.type==='تجاري'? part.commercial : part.retail;
+        ctrl.items.push({name:part.name, side: cb.dataset.side || null, price, kind:'part'});
+      });
+      closeModal(); paint(); scheduleSave();
+    });
+  }
+
+  function openAddServiceModal(ctrl){
+    openModal(`
+      <h3>إضافة خدمة</h3>
+      <div class="field" style="margin-bottom:12px;"><label>اسم الخدمة</label><input id="as_name" placeholder="مثال: فحص عام"></div>
+      <div class="field"><label>السعر</label><input type="number" id="as_price" placeholder="0"></div>
+      <div class="modal-actions"><button class="btn btn-ghost" type="button" onclick="closeModal()">إلغاء</button><button class="btn btn-primary" type="button" id="as_save">إضافة</button></div>
+    `);
+    document.getElementById('as_save').addEventListener('click', ()=>{
+      const name = document.getElementById('as_name').value.trim();
+      if(!name){ toast('من فضلك أدخل اسم الخدمة'); return; }
+      ctrl.items.push({name, side:null, price:Number(document.getElementById('as_price').value)||0, kind:'service'});
+      closeModal(); paint(); scheduleSave();
+    });
+  }
+}
+
+/* ---------- تعديل فاتورة (قائمة) ---------- */
+function deleteInvoiceById(id){
+  const idx = state.invoices.findIndex(i=>i.id===id);
+  if(idx===-1) return;
+  state.invoices.splice(idx,1);
+  state.ledger = state.ledger.filter(l=>l.invoiceId!==id);
+  scheduleSave();
+}
+
+function renderEditInvoice(panel){
+  panel.innerHTML = `
+    <div class="panel-head"><div><h2>✏️ تعديل فاتورة</h2><div class="ph-sub">اختر فاتورة محفوظة لتعديلها أو حذفها بالكامل</div></div></div>
+    <div class="search-bar">
+      <input id="editSearch" placeholder="ابحث برقم الفاتورة أو اسم العميل...">
+      <input type="date" id="editDate" style="max-width:170px;">
+    </div>
+    <div class="table-wrap"><table><thead><tr><th>الرقم</th><th>التاريخ</th><th>العميل</th><th>النوع</th><th>عدد الدراعات</th><th>الإجمالي</th><th>الحالة</th><th></th></tr></thead><tbody id="editTbody"></tbody></table></div>`;
+  function draw(){
+    const filter = document.getElementById('editSearch').value;
+    const d = document.getElementById('editDate').value;
+    const tb = document.getElementById('editTbody');
+    const rows = state.invoices.filter(i=> (i.id.includes(filter) || i.customer.includes(filter)) && (!d || i.date===d));
+    tb.innerHTML = rows.length? rows.map(i=>`
+      <tr><td>${i.id}</td><td>${i.date}</td><td>${i.customer}</td><td>${i.type}</td><td>${i.controllers.length}</td><td>${money(calcInvoiceTotal(i))}</td>
+      <td><span class="badge ${statusMeta[i.status].cls}">${statusMeta[i.status].label}</span></td>
+      <td><button class="btn btn-ghost btn-sm" type="button" data-edit="${i.id}">تعديل</button> <button class="btn btn-danger btn-sm" type="button" data-del="${i.id}">حذف</button></td></tr>`).join('')
+      : `<tr><td colspan="8"><div class="empty-state"><div class="es-icon">🔍</div>لا توجد نتائج مطابقة</div></td></tr>`;
+    tb.querySelectorAll('[data-edit]').forEach(b=>b.addEventListener('click', ()=>{
+      const inv = state.invoices.find(x=>x.id===b.dataset.edit);
+      buildInvoiceEditor(panel, inv, ()=> renderEditInvoice(panel));
+    }));
+    tb.querySelectorAll('[data-del]').forEach(b=>b.addEventListener('click', ()=>{
+      if(!confirm('متأكد من حذف الفاتورة ' + b.dataset.del + '؟ كل بياناتها هتتمسح نهائيًا كأنها متعملتش.')) return;
+      deleteInvoiceById(b.dataset.del);
+      draw();
+      toast('تم حذف الفاتورة');
+    }));
+  }
+  document.getElementById('editSearch').addEventListener('input', draw);
+  document.getElementById('editDate').addEventListener('change', draw);
+  draw();
+}
+
+/* ================= نظام صيانة الأجهزة ================= */
+function deleteDeviceInvoiceById(id){
+  const idx = state.deviceInvoices.findIndex(i=>i.id===id);
+  if(idx===-1) return;
+  state.deviceInvoices.splice(idx,1);
+  state.ledger = state.ledger.filter(l=>l.invoiceId!==id);
+  scheduleSave();
+}
+
+/* ---------- استلام جديد / تعديل فاتورة أجهزة (محرر مشترك) ---------- */
+function buildDeviceInvoiceEditor(panel, existingInvoice, onSavedFinal){
+  let inv = existingInvoice || null;
+  let h = existingInvoice || { id:'DEV-'+(state.deviceSeq.invoice), date:new Date().toISOString().slice(0,10), customer:'', phone:'', countDevices:0 };
+
+  paint();
+
+  function paint(){
+    const saved = !!inv;
+    panel.innerHTML = `
+      <div class="panel-head"><div><h2>🧾 ${existingInvoice? 'تعديل فاتورة '+h.id : 'استلام جهاز جديد'}</h2><div class="ph-sub">${saved? 'الفاتورة محفوظة — يمكنك إضافة الأجهزة بالأسفل':'أدخل بيانات العميل والاستلام أولاً'}</div></div></div>
+      <div class="form-grid">
+        <div class="field"><label>كود الفاتورة</label><input id="h_code" value="${h.id}"></div>
+        <div class="field"><label>التاريخ</label><input type="date" id="h_date" value="${h.date}"></div>
+        <div class="field"><label>اسم العميل</label><input id="h_customer" list="deviceCustomerList" value="${h.customer}" placeholder="اكتب اسم أو اختر عميل سابق"></div>
+        <div class="field"><label>رقم الهاتف (اختياري)</label><input id="h_phone" value="${h.phone}" placeholder="01xxxxxxxxx"></div>
+        <div class="field full"><label>عدد الأجهزة المستلمة</label><input type="number" min="0" id="h_count" value="${h.countDevices}"></div>
+      </div>
+      <datalist id="deviceCustomerList">${state.customers.map(c=>`<option value="${c.name}">`).join('')}</datalist>
+      <div style="display:flex; gap:10px; margin:18px 0 6px; flex-wrap:wrap;">
+        <button class="btn btn-primary" type="button" id="saveHeaderBtn">💾 ${saved? 'تحديث بيانات الاستلام':'حفظ بيانات الاستلام'}</button>
+        ${saved? '<button class="btn btn-ghost" type="button" id="sendIntakeBtn">📲 إرسال رسالة الاستلام</button>' : ''}
+      </div>
+      ${saved ? devicesHTML() : '<div class="empty-state"><div class="es-icon">🖥️</div>احفظ بيانات الاستلام أولاً لتتمكن من إضافة الأجهزة</div>'}
+    `;
+    wireHeader();
+    if(saved) wireDevices();
+  }
+
+  function devicesHTML(){
+    const total = calcDeviceInvoiceTotal(inv);
+    return `
+    <div style="margin-top:24px; border-top:1px solid var(--border); padding-top:18px;">
+      <div class="panel-head">
+        <div><h3>🖥️ أجهزة هذه الفاتورة</h3><div class="ph-sub">أضف كل جهاز، ثم حدد القطع والخدمات المستخدمة فيه</div></div>
+        <button class="btn btn-primary btn-sm" type="button" id="addDevBtn">➕ إضافة جهاز</button>
+      </div>
+      <div id="devList">
+        ${inv.devices.length? inv.devices.map(d=>deviceCardHTML(d)).join('') : '<div class="empty-state"><div class="es-icon">🖥️</div>لا يوجد أجهزة مضافة بعد</div>'}
+      </div>
+      <div class="grand-total"><span>الإجمالي الكلي</span><span>${money(total)}</span></div>
+      <div style="display:flex; gap:10px; margin-top:16px;">
+        <button class="btn btn-primary" type="button" id="finalSaveBtn" style="flex:1;">✅ حفظ الفاتورة وإنهاء</button>
+        ${existingInvoice? '<button class="btn btn-danger" type="button" id="deleteDevInvBtn">🗑️ حذف الفاتورة</button>' : ''}
+      </div>
+    </div>`;
+  }
+
+  function deviceCardHTML(d){
+    const sub = calcDeviceSubtotal(d);
+    return `
+    <div class="controller-card">
+      <div class="cc-head">
+        <div class="cc-title">💻 كود الجهاز: ${d.code||'—'} ${d.delivered? '<span class="badge badge-done" style="margin-right:6px;">تم التسليم</span>':''}</div>
+        <div style="display:flex; gap:6px;">
+          <button class="btn btn-ghost btn-sm" type="button" data-printbc="${d.uid}">🖨️ باركود</button>
+          <button class="btn btn-danger btn-sm" type="button" data-delctrl="${d.uid}">حذف الجهاز</button>
+        </div>
+      </div>
+      ${d.items.length? d.items.map((it,ix)=>`
+        <div class="item-row">
+          <div>${it.kind==='service'?'🛠️':'🔩'} ${it.name}</div>
+          <div><span class="ir-price">${money(it.price)}</span><span class="item-del" data-delitem="${d.uid}:${ix}">✖</span></div>
+        </div>`).join('') : '<div style="color:var(--text-3); font-size:12.5px; padding:6px 0;">لم تتم إضافة قطع أو خدمات بعد</div>'}
+      <div class="cc-sub"><span>إجمالي الجهاز</span><span>${money(sub)}</span></div>
+      <div class="field" style="margin-top:10px;">
+        <label style="font-size:11.5px;">ملاحظة خاصة (تظهر لك فقط، مش هتتبعت للعميل)</label>
+        <input type="text" class="dev-note" data-note="${d.uid}" value="${d.note||''}" placeholder="اكتب ملاحظة داخلية...">
+      </div>
+      <div class="cc-actions">
+        <button class="btn btn-ghost btn-sm" type="button" data-additem="${d.uid}">➕ إضافة خدمة أو قطعة غيار</button>
+      </div>
+    </div>`;
+  }
+
+  function wireHeader(){
+    const custInput = document.getElementById('h_customer');
+    custInput.addEventListener('change', ()=>{
+      const match = state.customers.find(c=>c.name===custInput.value.trim());
+      if(match) document.getElementById('h_phone').value = match.phone;
+    });
+    document.getElementById('saveHeaderBtn').addEventListener('click', ()=>{
+      readHeader();
+      if(!h.customer){ toast('من فضلك أدخل اسم العميل أولاً'); return; }
+      if(!state.customers.find(c=>c.name===h.customer)) state.customers.push({name:h.customer, phone:h.phone});
+      if(!inv){
+        inv = h; inv.devices=[]; inv.status='repair';
+        inv.paid=0; inv.due=0; inv.discount=0; inv.discountPercent=0; inv.paymentType=null;
+        state.deviceInvoices.unshift(inv);
+        state.deviceSeq.invoice++;
+        toast('تم حفظ بيانات الاستلام، أضف الأجهزة بالأسفل');
+      } else {
+        toast('تم تحديث بيانات الفاتورة');
+      }
+      scheduleSave();
+      paint();
+    });
+    if(inv){
+      const sendBtn = document.getElementById('sendIntakeBtn');
+      if(sendBtn) sendBtn.addEventListener('click', ()=>{
+        const data = {customer:h.customer, code:h.id, date:h.date, count:h.countDevices, phone:h.phone, shopPhone:state.settings.shopPhone};
+        const msg = applyTemplate(state.settings.templates.deviceIntake, data);
+        sendWhatsApp(h.phone, msg);
+      });
+    }
+  }
+
+  function readHeader(){
+    h.id = document.getElementById('h_code').value.trim() || h.id;
+    h.date = document.getElementById('h_date').value || h.date;
+    h.customer = document.getElementById('h_customer').value.trim();
+    h.phone = document.getElementById('h_phone').value.trim();
+    h.countDevices = Number(document.getElementById('h_count').value)||0;
+  }
+
+  function wireDevices(){
+    document.getElementById('addDevBtn').addEventListener('click', openAddDeviceModal);
+    document.getElementById('finalSaveBtn').addEventListener('click', ()=>{
+      toast('تم حفظ الفاتورة ' + inv.id + ' بنجاح ✅');
+      saveToCloud();
+      if(onSavedFinal) onSavedFinal();
+    });
+    const delBtn = document.getElementById('deleteDevInvBtn');
+    if(delBtn) delBtn.addEventListener('click', ()=>{
+      if(!confirm('متأكد من حذف الفاتورة ' + inv.id + ' نهائيًا؟')) return;
+      deleteDeviceInvoiceById(inv.id);
+      toast('تم حذف الفاتورة');
+      if(onSavedFinal) onSavedFinal();
+    });
+    panel.querySelectorAll('[data-delctrl]').forEach(b=>{
+      b.addEventListener('click', ()=>{ inv.devices = inv.devices.filter(d=>d.uid!=b.dataset.delctrl); recomputeDeviceInvoiceStatus(inv); paint(); scheduleSave(); });
+    });
+    panel.querySelectorAll('[data-delitem]').forEach(b=>{
+      b.addEventListener('click', ()=>{
+        const [uid,ix] = b.dataset.delitem.split(':');
+        const d = inv.devices.find(x=>x.uid==uid);
+        d.items.splice(Number(ix),1); recomputeDeviceInvoiceStatus(inv); paint(); scheduleSave();
+      });
+    });
+    panel.querySelectorAll('[data-additem]').forEach(b=>{
+      b.addEventListener('click', ()=> openAddDeviceItemModal(inv.devices.find(d=>d.uid==b.dataset.additem)));
+    });
+    panel.querySelectorAll('[data-printbc]').forEach(b=>{
+      b.addEventListener('click', ()=>{
+        const d = inv.devices.find(x=>x.uid==b.dataset.printbc);
+        printDeviceBarcode(h.customer, h.phone, d.code);
+      });
+    });
+    panel.querySelectorAll('.dev-note').forEach(inp=>{
+      inp.addEventListener('change', ()=>{
+        const d = inv.devices.find(x=>x.uid==inp.dataset.note);
+        if(d){ d.note = inp.value; scheduleSave(); }
+      });
+    });
+  }
+
+  function openAddDeviceModal(){
+    openModal(`
+      <h3>إضافة جهاز جديد</h3>
+      <div class="field"><label>كود الجهاز</label>
+        <div style="display:flex; gap:8px;">
+          <input id="ad_code" placeholder="مثال: D-01" style="flex:1;">
+          <button class="btn btn-ghost btn-sm" type="button" id="ad_print" title="طباعة باركود للصق على الجهاز">🖨️</button>
+        </div>
+      </div>
+      <div class="modal-actions"><button class="btn btn-ghost" type="button" onclick="closeModal()">إلغاء</button><button class="btn btn-primary" type="button" id="ad_save">إضافة</button></div>
+    `);
+    document.getElementById('ad_print').addEventListener('click', ()=>{
+      const code = document.getElementById('ad_code').value.trim();
+      printDeviceBarcode(h.customer, h.phone, code);
+    });
+    document.getElementById('ad_save').addEventListener('click', ()=>{
+      inv.devices.push({uid: state.deviceSeq.dev++, code: document.getElementById('ad_code').value.trim(), note:'', items:[], delivered:false, deliveredAt:null});
+      recomputeDeviceInvoiceStatus(inv);
+      closeModal(); paint(); scheduleSave();
+    });
+  }
+
+  function openAddDeviceItemModal(device){
+    const list = state.deviceParts;
+    const rows = list.map(p=>{
+      if(p.kind==='service'){
+        return `<div class="cb-item"><label><input type="checkbox" data-item="${p.id}"> ${p.name} (خدمة)</label><input type="number" class="svc-price" data-for="${p.id}" placeholder="السعر" style="width:90px;"></div>`;
+      }
+      return `<div class="cb-item"><label><input type="checkbox" data-item="${p.id}"> ${p.name}</label><span style="color:var(--text-3); font-size:12px;">${money(p.price)}</span></div>`;
+    }).join('') || '<div class="empty-state">لا توجد قطع أو خدمات مسجلة بعد — أضفها من صفحة الخدمات وقطع الغيار</div>';
+    openModal(`
+      <h3>إضافة خدمة أو قطعة غيار</h3>
+      <div class="checkbox-list">${rows}</div>
+      <div class="modal-actions"><button class="btn btn-ghost" type="button" onclick="closeModal()">إلغاء</button><button class="btn btn-primary" type="button" id="ai_save">إضافة المحدد</button></div>
+    `);
+    document.getElementById('ai_save').addEventListener('click', ()=>{
+      document.querySelectorAll('#modalBox input[type=checkbox]:checked').forEach(cb=>{
+        const part = list.find(p=>p.id==cb.dataset.item);
+        if(!part) return;
+        if(part.kind==='service'){
+          const priceInput = document.querySelector(`.svc-price[data-for="${part.id}"]`);
+          const price = Number(priceInput.value)||0;
+          if(price<=0){ toast('من فضلك أدخل سعر خدمة: ' + part.name); return; }
+          device.items.push({name:part.name, price, kind:'service'});
+        } else {
+          device.items.push({name:part.name, price:part.price, kind:'part'});
+        }
+      });
+      recomputeDeviceInvoiceStatus(inv);
+      closeModal(); paint(); scheduleSave();
+    });
+  }
+}
+
+/* ---------- تعديل فاتورة أجهزة (قائمة) ---------- */
+function renderDeviceEditInvoice(panel){
+  panel.innerHTML = `
+    <div class="panel-head"><div><h2>✏️ تعديل فاتورة</h2><div class="ph-sub">اختر فاتورة أجهزة محفوظة لتعديلها أو حذفها</div></div></div>
+    <div class="search-bar">
+      <input id="devEditSearch" placeholder="ابحث برقم الفاتورة أو اسم العميل...">
+      <input type="date" id="devEditDate" style="max-width:170px;">
+    </div>
+    <div class="table-wrap"><table><thead><tr><th>الرقم</th><th>التاريخ</th><th>العميل</th><th>عدد الأجهزة</th><th>الإجمالي</th><th>الحالة</th><th></th></tr></thead><tbody id="devEditTbody"></tbody></table></div>`;
+  function draw(){
+    const filter = document.getElementById('devEditSearch').value;
+    const d = document.getElementById('devEditDate').value;
+    const tb = document.getElementById('devEditTbody');
+    const rows = state.deviceInvoices.filter(i=> (i.id.includes(filter) || i.customer.includes(filter)) && (!d || i.date===d));
+    tb.innerHTML = rows.length? rows.map(i=>`
+      <tr><td>${i.id}</td><td>${i.date}</td><td>${i.customer}</td><td>${i.devices.length}</td><td>${money(calcDeviceInvoiceTotal(i))}</td>
+      <td><span class="badge ${statusMeta[i.status].cls}">${statusMeta[i.status].label}</span></td>
+      <td><button class="btn btn-ghost btn-sm" type="button" data-edit="${i.id}">تعديل</button> <button class="btn btn-danger btn-sm" type="button" data-del="${i.id}">حذف</button></td></tr>`).join('')
+      : `<tr><td colspan="7"><div class="empty-state"><div class="es-icon">🔍</div>لا توجد نتائج مطابقة</div></td></tr>`;
+    tb.querySelectorAll('[data-edit]').forEach(b=>b.addEventListener('click', ()=>{
+      const inv = state.deviceInvoices.find(x=>x.id===b.dataset.edit);
+      buildDeviceInvoiceEditor(panel, inv, ()=> renderDeviceEditInvoice(panel));
+    }));
+    tb.querySelectorAll('[data-del]').forEach(b=>b.addEventListener('click', ()=>{
+      if(!confirm('متأكد من حذف الفاتورة ' + b.dataset.del + '؟')) return;
+      deleteDeviceInvoiceById(b.dataset.del);
+      draw();
+      toast('تم حذف الفاتورة');
+    }));
+  }
+  document.getElementById('devEditSearch').addEventListener('input', draw);
+  document.getElementById('devEditDate').addEventListener('change', draw);
+  draw();
+}
+
+/* ---------- الأجهزة المعلقة والتسليم ---------- */
+function renderDevicePending(panel){
+  let totalPending = 0;
+  state.deviceInvoices.forEach(inv=> inv.devices.forEach(d=>{ if(!d.delivered) totalPending++; }));
+  const activeInvoices = state.deviceInvoices.filter(inv => inv.devices.length===0 || inv.devices.some(d=>!d.delivered));
+  function block(inv){
+    const remaining = inv.devices.filter(d=>!d.delivered).length;
+    return `
+    <div class="controller-card" style="margin-bottom:16px;">
+      <div class="cc-head">
+        <div class="cc-title">${inv.id} — ${inv.customer} <span style="color:var(--text-3); font-size:11.5px;">(${inv.phone||'—'})</span></div>
+        <span class="badge badge-wait">متبقي ${remaining} من ${inv.devices.length}</span>
+      </div>
+      ${inv.devices.length? inv.devices.map(d=>`
+        <div class="item-row">
+          <div>💻 كود: ${d.code||'—'} ${d.items.length===0? '<span class="badge badge-wait" style="margin-right:6px;">لم يُصلح بعد</span>' : d.delivered? '<span class="badge badge-done" style="margin-right:6px;">تم التسليم</span>' : '<span class="badge badge-ready" style="margin-right:6px;">جاهز للتسليم</span>'}</div>
+          <div>${!d.delivered && d.items.length>0 ? `<button class="btn btn-primary btn-sm" type="button" data-deliverdev="${inv.id}:${d.uid}">تسليم</button>` : ''}</div>
+        </div>`).join('') : '<div style="padding:8px 0; color:var(--text-3); font-size:12.5px;">لا يوجد أجهزة مضافة بعد</div>'}
+    </div>`;
+  }
+  panel.innerHTML = `
+    <div class="panel-head"><div><h2>🔁 الأجهزة المعلقة والتسليم</h2><div class="ph-sub">كل الفواتير وأجهزتها، وتسليم كل جهاز على حدة</div></div></div>
+    <div class="stat-card" style="max-width:280px; margin-bottom:20px;">
+      <div class="st-label">إجمالي الأجهزة المعلقة بالمركز</div>
+      <div class="st-value" style="color:var(--gold)">${totalPending}</div>
+    </div>
+    ${activeInvoices.length? activeInvoices.map(block).join('') : '<div class="empty-state"><div class="es-icon">✅</div>لا يوجد فواتير معلقة حاليًا</div>'}
+  `;
+  panel.querySelectorAll('[data-deliverdev]').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      const [invId, uid] = b.dataset.deliverdev.split(':');
+      const inv = state.deviceInvoices.find(x=>x.id===invId);
+      const d = inv.devices.find(x=>x.uid==uid);
+      d.delivered = true; d.deliveredAt = todayStr();
+      recomputeDeviceInvoiceStatus(inv);
+      scheduleSave();
+      toast('تم تسليم الجهاز بنجاح');
+      renderDevicePending(panel);
+    });
+  });
+}
+
+/* ---------- سجل فواتير الأجهزة ---------- */
+function renderDeviceInvoiceLog(panel){
+  panel.innerHTML = `
+    <div class="panel-head"><div><h2>📚 سجل الفواتير</h2><div class="ph-sub">جميع فواتير صيانة الأجهزة المسجلة</div></div></div>
+    <div class="search-bar">
+      <input id="devLogSearch" placeholder="ابحث برقم الفاتورة أو العميل...">
+      <input type="date" id="devLogDate" style="max-width:170px;">
+      <select id="devLogStatus" style="min-width:180px">
+        <option value="">كل الحالات</option>
+        ${Object.entries(statusMeta).map(([k,v])=>`<option value="${k}">${v.label}</option>`).join('')}
+      </select>
+    </div>
+    <div class="table-wrap"><table><thead><tr><th>الرقم</th><th>التاريخ</th><th>العميل</th><th>عدد الأجهزة</th><th>الإجمالي</th><th>الحالة</th><th></th></tr></thead><tbody id="devLogTbody"></tbody></table></div>`;
+  function draw(){
+    const f = document.getElementById('devLogSearch').value;
+    const d = document.getElementById('devLogDate').value;
+    const s = document.getElementById('devLogStatus').value;
+    const rows = state.deviceInvoices.filter(i=> (i.id.includes(f)||i.customer.includes(f)) && (!d || i.date===d) && (!s || i.status===s));
+    document.getElementById('devLogTbody').innerHTML = rows.length ? rows.map(i=>`
+      <tr><td>${i.id}</td><td>${i.date}</td><td>${i.customer}</td><td>${i.devices.length}</td><td>${money(calcDeviceInvoiceTotal(i))}</td>
+      <td><span class="badge ${statusMeta[i.status].cls}">${statusMeta[i.status].label}</span></td>
+      <td><button class="btn btn-ghost btn-sm" type="button" data-details="${i.id}">تفاصيل</button></td></tr>`).join('')
+      : `<tr><td colspan="7"><div class="empty-state"><div class="es-icon">📭</div>لا توجد فواتير مطابقة</div></td></tr>`;
+    document.getElementById('devLogTbody').querySelectorAll('[data-details]').forEach(b=>{
+      b.addEventListener('click', ()=> openDeviceInvoiceDetails(b.dataset.details, draw));
+    });
+  }
+  document.getElementById('devLogSearch').addEventListener('input', draw);
+  document.getElementById('devLogDate').addEventListener('change', draw);
+  document.getElementById('devLogStatus').addEventListener('change', draw);
+  draw();
+}
+
+function openDeviceInvoiceDetails(id, refreshCb){
+  const inv = state.deviceInvoices.find(i=>i.id===id);
+  if(!inv) return;
+  paintDetails();
+  function paintDetails(){
+    const total = calcDeviceInvoiceTotal(inv);
+    inv.paid = inv.paid||0; inv.due = inv.due!=null? inv.due : total; inv.discount = inv.discount||0; inv.discountPercent = inv.discountPercent||0;
+    openModal(`
+      <h3>تفاصيل الفاتورة ${inv.id}</h3>
+      <div style="font-size:13px; color:var(--text-2); line-height:2;">
+        <div><b>العميل:</b> ${inv.customer} — ${inv.phone||'بدون رقم'}</div>
+        <div><b>التاريخ:</b> ${inv.date}</div>
+        <div><b>عدد الأجهزة:</b> ${inv.devices.length}</div>
+        <div><b>الحالة:</b> <span class="badge ${statusMeta[inv.status].cls}">${statusMeta[inv.status].label}</span></div>
+        <div><b>الإجمالي:</b> ${money(total)} &nbsp; <b>المدفوع:</b> ${money(inv.paid)} &nbsp; <b>المتبقي:</b> ${money(inv.due)}</div>
+        ${inv.discount>0? `<div><b>خصم مسجل:</b> ${money(inv.discount)} (${inv.discountPercent}%)</div>`:''}
+      </div>
+      <div style="border-top:1px solid var(--border); margin:14px 0; padding-top:14px;">
+        <label style="display:block; font-size:12.5px; color:var(--text-2); margin-bottom:6px;">تسجيل دفعة</label>
+        <div class="form-grid" style="margin-bottom:10px;">
+          <div class="field"><label>المبلغ المدفوع</label><input type="number" id="pay_amount" value="${inv.paid||''}"></div>
+          <div class="field"><label>نوع السداد</label>
+            <select id="pay_type">
+              <option value="مدفوع">مدفوع بالكامل (والباقي يُحسب خصم)</option>
+              <option value="أجل">أجل (الباقي دين على العميل)</option>
+              <option value="غير مدفوع">غير مدفوع</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-sm" type="button" id="savePayBtn">💾 حفظ الدفع</button>
+      </div>
+      <div class="modal-actions" style="justify-content:space-between; flex-wrap:wrap;">
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button class="btn btn-ghost" type="button" id="viewInvoiceBtn">🔍 عرض الفاتورة</button>
+          <button class="btn btn-ghost" type="button" id="exportPdfBtn">📄 تصدير PDF</button>
+          <button class="btn btn-ghost" type="button" id="sendCustomerBtn">📲 إرسال للعميل</button>
+        </div>
+        <button class="btn btn-ghost" type="button" onclick="closeModal()">إغلاق</button>
+      </div>
+    `, true);
+    document.getElementById('savePayBtn').addEventListener('click', ()=>{
+      const total2 = calcDeviceInvoiceTotal(inv);
+      const paidAmt = Number(document.getElementById('pay_amount').value)||0;
+      const type = document.getElementById('pay_type').value;
+      const remaining = Math.max(0, total2 - paidAmt);
+      inv.paymentType = type;
+      if(type==='أجل'){
+        inv.paid = paidAmt; inv.due = remaining; inv.discount=0; inv.discountPercent=0;
+        if(remaining>0) state.ledger.push({customer:inv.customer, invoiceId:inv.id, amount:remaining, type:'أجل', date:todayStr()});
+      } else if(type==='مدفوع'){
+        inv.paid = total2; inv.due = 0; inv.discount = remaining; inv.discountPercent = total2>0? Math.round(remaining/total2*100):0;
+      } else {
+        inv.paid = 0; inv.due = total2; inv.discount=0; inv.discountPercent=0;
+        if(total2>0) state.ledger.push({customer:inv.customer, invoiceId:inv.id, amount:total2, type:'غير مدفوع', date:todayStr()});
+      }
+      recomputeDeviceInvoiceStatus(inv);
+      toast('تم حفظ بيانات الدفع');
+      scheduleSave();
+      paintDetails();
+      if(refreshCb) refreshCb();
+    });
+    document.getElementById('viewInvoiceBtn').addEventListener('click', ()=> openDeviceInvoiceViewModal(inv));
+    document.getElementById('exportPdfBtn').addEventListener('click', ()=> exportDeviceInvoicePDF(inv));
+    document.getElementById('sendCustomerBtn').addEventListener('click', ()=>{
+      const data = {customer:inv.customer, code:inv.id, date:inv.date, phone:inv.phone||'—', count:inv.devices.length, total: money(calcDeviceInvoiceTotal(inv)), shopPhone:state.settings.shopPhone};
+      const msg = applyTemplate(state.settings.templates.deviceInvoice, data);
+      sendWhatsApp(inv.phone, msg);
+    });
+  }
+}
+
+function buildDeviceInvoiceViewHTML(inv){
+  const total = calcDeviceInvoiceTotal(inv);
+  const paid = inv.paid||0;
+  const due = inv.due!=null? inv.due : total;
+  const discount = inv.discount||0;
+  const discountPercent = inv.discountPercent||0;
+  const rows = inv.devices.map(d=>{
+    const sub = calcDeviceSubtotal(d);
+    const itemsText = d.items.length
+      ? d.items.map(it=> it.name + (it.kind==='service'? ' 🛠️':'')).join('، ')
+      : 'لا توجد أصناف';
+    return `
+      <div style="margin-bottom:6px; padding-bottom:6px; border-bottom:1px dashed #000;">
+        <div style="font-weight:bold;">جهاز — ${d.code||'—'}</div>
+        <div style="font-size:10.5px; color:#333; margin:2px 0;">${itemsText}</div>
+        <div style="display:flex; justify-content:space-between; font-weight:600;"><span>إجمالي الجهاز</span><span>${money(sub)}</span></div>
+      </div>`;
+  }).join('');
+  return `
+    <div style="width:76mm; margin:0 auto; font-family:'Courier New',monospace; color:#000; direction:rtl; font-size:11.5px; line-height:1.7;">
+      <div style="text-align:center; margin-bottom:8px;">
+        <div style="font-size:15px; font-weight:900;">First — Fantasy</div>
+        <div>مركز صيانة أجهزة بلايستيشن</div>
+        <div>${state.settings.shopPhone||''}</div>
+      </div>
+      <div style="border-top:1px dashed #000; margin:6px 0;"></div>
+      <div>فاتورة: ${inv.id}</div>
+      <div>التاريخ: ${inv.date}</div>
+      <div>العميل: ${inv.customer}</div>
+      <div>الهاتف: ${inv.phone||'—'}</div>
+      <div>الحالة: ${statusMeta[inv.status].label}</div>
+      <div style="border-top:1px dashed #000; margin:6px 0;"></div>
+      ${rows || '<div style="text-align:center; color:#777; padding:8px 0;">لا توجد أصناف مسجلة</div>'}
+      <div style="border-top:1px dashed #000; margin:6px 0;"></div>
+      <div style="display:flex; justify-content:space-between; font-weight:900; font-size:13px;"><span>الإجمالي</span><span>${money(total)}</span></div>
+      <div style="display:flex; justify-content:space-between;"><span>المدفوع</span><span>${money(paid)}</span></div>
+      <div style="display:flex; justify-content:space-between;"><span>المتبقي</span><span>${money(due)}</span></div>
+      ${discount>0? `<div style="display:flex; justify-content:space-between;"><span>الخصم</span><span>${money(discount)} (${discountPercent}%)</span></div>`:''}
+      <div style="border-top:1px dashed #000; margin:8px 0;"></div>
+      <div style="text-align:center; font-size:10.5px;">شكراً لزيارتكم — First Fantasy Service</div>
+    </div>`;
+}
+function openDeviceInvoiceViewModal(inv){
+  openModal(`
+    <h3>معاينة الفاتورة ${inv.id}</h3>
+    <div style="background:#fff; border-radius:10px; padding:16px;">${buildDeviceInvoiceViewHTML(inv)}</div>
+    <div class="modal-actions"><button class="btn btn-ghost" type="button" onclick="closeModal()">إغلاق</button></div>
+  `, true);
+}
+function exportDeviceInvoicePDF(inv){
+  document.getElementById('printArea').innerHTML = buildDeviceInvoiceViewHTML(inv);
+  window.print();
+}
+
+/* ---------- إحصائيات وتقارير الأجهزة ---------- */
+function renderDeviceStats(panel){
+  const total = state.deviceInvoices.length;
+  const revenue = state.deviceInvoices.reduce((s,i)=>s+calcDeviceInvoiceTotal(i),0) + state.deviceSales.reduce((s,i)=>s+i.price*i.qty,0);
+  const ready = state.deviceInvoices.filter(i=>i.status==='fixed').length;
+  const byStatus = Object.keys(statusMeta).map(k=>({k, n: state.deviceInvoices.filter(i=>i.status===k).length}));
+  const maxN = Math.max(1, ...byStatus.map(b=>b.n));
+  panel.innerHTML = `
+    <div class="panel-head"><div><h2>📊 الإحصائيات والتقارير</h2><div class="ph-sub">نظرة عامة على أداء قسم صيانة الأجهزة</div></div></div>
+    <div class="stat-grid">
+      <div class="stat-card"><div class="st-label">إجمالي الفواتير</div><div class="st-value">${total}</div></div>
+      <div class="stat-card"><div class="st-label">إجمالي الإيرادات</div><div class="st-value">${money(revenue)}</div><div class="st-trend">صيانة + مبيعات</div></div>
+      <div class="stat-card"><div class="st-label">تم إصلاحها</div><div class="st-value">${ready}</div><div class="st-trend" style="color:var(--cyan)">بانتظار التسليم</div></div>
+      <div class="stat-card"><div class="st-label">عدد العملاء</div><div class="st-value">${state.customers.length}</div></div>
+    </div>
+    <div class="panel" style="box-shadow:none;">
+      <h3 style="margin-bottom:14px; font-size:15px;">توزيع الفواتير حسب الحالة</h3>
+      <div class="bars">
+        ${byStatus.map(b=>`
+          <div class="bar-col">
+            <div style="font-size:12px;color:var(--text-2)">${b.n}</div>
+            <div class="bar" style="height:${(b.n/maxN*120)||4}px"></div>
+            <div class="bar-label">${statusMeta[b.k].label}</div>
+          </div>`).join('')}
+      </div>
+    </div>`;
+}
+
+/* ---------- الخدمات وقطع الغيار (الأجهزة) ---------- */
+function renderDeviceParts(panel){
+  panel.innerHTML = `
+    <div class="panel-head">
+      <div><h2>📦 الخدمات وقطع الغيار</h2><div class="ph-sub">القائمة الموحدة لقطع الغيار والخدمات الخاصة بصيانة الأجهزة</div></div>
+      <button class="btn btn-primary btn-sm" type="button" id="addDevPart">➕ إضافة</button>
+    </div>
+    <div class="table-wrap"><table><thead><tr><th>الاسم</th><th>النوع</th><th>السعر</th><th></th></tr></thead><tbody id="devPartsTbody"></tbody></table></div>`;
+  function draw(){
+    document.getElementById('devPartsTbody').innerHTML = state.deviceParts.length ? state.deviceParts.map((p,idx)=>`
+      <tr><td>${p.name}</td><td>${p.kind==='service'?'خدمة':'قطعة غيار'}</td>
+      <td>${p.kind==='service'? '<span style="color:var(--text-3);">يُحدد عند الإضافة</span>' : money(p.price)}</td>
+      <td><button class="btn btn-ghost btn-sm" type="button" data-edit="${idx}">تعديل</button> <button class="btn btn-danger btn-sm" type="button" data-del="${idx}">حذف</button></td></tr>`).join('')
+      : `<tr><td colspan="4"><div class="empty-state">لا توجد أصناف بعد</div></td></tr>`;
+    document.getElementById('devPartsTbody').querySelectorAll('[data-del]').forEach(b=>{
+      b.addEventListener('click', ()=>{ state.deviceParts.splice(b.dataset.del,1); draw(); toast('تم الحذف'); scheduleSave(); });
+    });
+    document.getElementById('devPartsTbody').querySelectorAll('[data-edit]').forEach(b=>{
+      b.addEventListener('click', ()=> openModal2(Number(b.dataset.edit)));
+    });
+  }
+  function openModal2(editIdx){
+    const isEdit = editIdx!=null;
+    const p = isEdit? state.deviceParts[editIdx] : null;
+    openModal(`
+      <h3>${isEdit?'تعديل صنف':'إضافة صنف جديد'}</h3>
+      <div class="field" style="margin-bottom:12px;"><label>الاسم</label><input id="dp_name" value="${p?p.name:''}"></div>
+      <div class="field" style="margin-bottom:12px;"><label>النوع</label>
+        <select id="dp_kind">
+          <option value="part" ${p&&p.kind==='part'?'selected':''}>قطعة غيار (سعر ثابت)</option>
+          <option value="service" ${p&&p.kind==='service'?'selected':''}>خدمة (السعر يُكتب عند كل استخدام)</option>
+        </select>
+      </div>
+      <div class="field" id="dp_priceWrap" style="${p&&p.kind==='service'?'display:none;':''}"><label>السعر</label><input type="number" id="dp_price" value="${p&&p.price!=null?p.price:''}"></div>
+      <div class="modal-actions"><button class="btn btn-ghost" type="button" onclick="closeModal()">إلغاء</button><button class="btn btn-primary" type="button" id="dp_save">${isEdit?'حفظ':'إضافة'}</button></div>
+    `);
+    document.getElementById('dp_kind').addEventListener('change', e=>{
+      document.getElementById('dp_priceWrap').style.display = e.target.value==='service'? 'none':'block';
+    });
+    document.getElementById('dp_save').addEventListener('click', ()=>{
+      const name = document.getElementById('dp_name').value.trim();
+      if(!name){ toast('من فضلك أدخل الاسم'); return; }
+      const kind = document.getElementById('dp_kind').value;
+      const payload = {name, kind, price: kind==='part'? (Number(document.getElementById('dp_price').value)||0) : null};
+      if(isEdit){ Object.assign(p, payload); toast('تم الحفظ'); }
+      else { payload.id = state.devicePartSeq++; state.deviceParts.push(payload); toast('تمت الإضافة'); }
+      closeModal(); draw(); scheduleSave();
+    });
+  }
+  document.getElementById('addDevPart').addEventListener('click', ()=> openModal2(null));
+  draw();
+}
+
+/* ---------- فاتورة بيع (أجهزة) ---------- */
+function renderDeviceSale(panel){
+  panel.innerHTML = `
+    <div class="panel-head"><div><h2>🛒 فاتورة بيع</h2><div class="ph-sub">بيع قطع غيار مباشرة للعميل بدون صيانة</div></div></div>
+    <div class="form-grid">
+      <div class="field"><label>اسم العميل</label><input id="ds_customer" placeholder="اسم العميل (اختياري)"></div>
+      <div class="field"><label>الصنف</label><select id="ds_item">${state.deviceParts.filter(p=>p.kind==='part').map(p=>`<option value="${p.id}" data-price="${p.price}">${p.name} — ${money(p.price)}</option>`).join('') || '<option disabled>لا توجد قطع متاحة</option>'}</select></div>
+      <div class="field"><label>الكمية</label><input type="number" id="ds_qty" value="1" min="1"></div>
+      <div class="field"><label>الإجمالي</label><input id="ds_total" disabled></div>
+    </div>
+    <button class="btn btn-primary" style="margin-top:18px" type="button" id="dsSaveBtn">💳 إصدار فاتورة البيع</button>
+    <h3 style="margin:24px 0 12px; font-size:15px;">آخر فواتير البيع</h3>
+    <div class="table-wrap"><table><thead><tr><th>الرقم</th><th>الصنف</th><th>الكمية</th><th>الإجمالي</th><th>التاريخ</th></tr></thead><tbody id="dsTbody"></tbody></table></div>`;
+  function updateTotal(){
+    const sel = document.getElementById('ds_item');
+    if(!sel.selectedOptions[0] || !sel.selectedOptions[0].dataset.price){ document.getElementById('ds_total').value=''; return; }
+    const price = Number(sel.selectedOptions[0].dataset.price);
+    const qty = Number(document.getElementById('ds_qty').value)||0;
+    document.getElementById('ds_total').value = money(price*qty);
+  }
+  document.getElementById('ds_item').addEventListener('change', updateTotal);
+  document.getElementById('ds_qty').addEventListener('input', updateTotal);
+  function drawSales(){
+    document.getElementById('dsTbody').innerHTML = state.deviceSales.map(s=>`
+      <tr><td>${s.id}</td><td>${s.item}</td><td>${s.qty}</td><td>${money(s.price*s.qty)}</td><td>${s.date}</td></tr>`).join('');
+  }
+  document.getElementById('dsSaveBtn').addEventListener('click', ()=>{
+    const sel = document.getElementById('ds_item');
+    const part = state.deviceParts.find(p=>p.id==sel.value);
+    if(!part){ toast('لا توجد قطعة محددة'); return; }
+    const qty = Number(document.getElementById('ds_qty').value)||1;
+    const id = 'DSAL-' + (state.deviceSeq.sale++);
+    state.deviceSales.unshift({id, item:part.name, qty, price:part.price, customer:document.getElementById('ds_customer').value||'زائر', date:todayStr()});
+    toast('تم إصدار فاتورة البيع ' + id);
+    document.getElementById('ds_customer').value='';
+    document.getElementById('ds_qty').value=1;
+    scheduleSave();
+    drawSales();
+  });
+  updateTotal();
+  drawSales();
+}
+
+/* ---------- جدول أسعار (خدمات مرجعية) ---------- */
+function renderPriceList(panel){
+  panel.innerHTML = `
+    <div class="panel-head">
+      <div><h2>💳 جدول الأسعار</h2><div class="ph-sub">الأسعار المرجعية لخدمات صيانة الدراعات الشائعة</div></div>
+      <button class="btn btn-primary btn-sm" type="button" id="addPrice">➕ إضافة خدمة</button>
+    </div>
+    <div class="table-wrap"><table><thead><tr><th>الخدمة</th><th>السعر</th><th></th></tr></thead><tbody id="priceTbody"></tbody></table></div>`;
+  function draw(){
+    document.getElementById('priceTbody').innerHTML = state.priceList.map((p,idx)=>`
+      <tr><td>${p.name}</td>
+      <td><input class="price-input" type="number" data-idx="${idx}" value="${p.price}"></td>
+      <td><button class="btn btn-danger btn-sm" type="button" data-del="${idx}">حذف</button></td></tr>`).join('');
+    document.getElementById('priceTbody').querySelectorAll('input').forEach(inp=>{
+      inp.addEventListener('change', ()=>{ state.priceList[inp.dataset.idx].price = Number(inp.value)||0; toast('تم تحديث السعر'); scheduleSave(); });
+    });
+    document.getElementById('priceTbody').querySelectorAll('[data-del]').forEach(b=>{
+      b.addEventListener('click', ()=>{ state.priceList.splice(b.dataset.del,1); draw(); toast('تم حذف الخدمة'); scheduleSave(); });
+    });
+  }
+  document.getElementById('addPrice').addEventListener('click', ()=>{
+    openModal(`<h3>إضافة خدمة جديدة</h3>
+      <div class="field" style="margin-bottom:12px"><label>اسم الخدمة</label><input id="np_name"></div>
+      <div class="field"><label>السعر</label><input type="number" id="np_price"></div>
+      <div class="modal-actions"><button class="btn btn-ghost" type="button" onclick="closeModal()">إلغاء</button><button class="btn btn-primary" type="button" id="np_save">إضافة</button></div>`);
+    document.getElementById('np_save').addEventListener('click', ()=>{
+      const name = document.getElementById('np_name').value.trim();
+      if(!name) return;
+      state.priceList.push({name, price:Number(document.getElementById('np_price').value)||0});
+      closeModal(); draw(); toast('تمت إضافة الخدمة'); scheduleSave();
+    });
+  });
+  draw();
+}
+
+/* ---------- قطع الغيار (فور / فايف) ---------- */
+function renderParts(panel){
+  panel.innerHTML = `
+    <div class="panel-head"><div><h2>📦 قطع الغيار</h2><div class="ph-sub">إدارة قطع الغيار الخاصة بدراعات فور وفايف</div></div></div>
+    <div class="parts-columns">
+      <div>
+        <div class="panel-head"><h3>فور (PS4)</h3><button class="btn btn-primary btn-sm" type="button" id="addPartPs4">➕ إضافة قطعة</button></div>
+        <div class="table-wrap"><table><thead><tr><th>القطعة</th><th>النوع</th><th>قطاعي</th><th>تجاري</th><th>العدد</th><th></th></tr></thead><tbody id="ps4Tbody"></tbody></table></div>
+      </div>
+      <div>
+        <div class="panel-head"><h3>فايف (PS5)</h3><button class="btn btn-primary btn-sm" type="button" id="addPartPs5">➕ إضافة قطعة</button></div>
+        <div class="table-wrap"><table><thead><tr><th>القطعة</th><th>النوع</th><th>قطاعي</th><th>تجاري</th><th>العدد</th><th></th></tr></thead><tbody id="ps5Tbody"></tbody></table></div>
+      </div>
+    </div>`;
+  function draw(){
+    ['ps4','ps5'].forEach(cons=>{
+      document.getElementById(cons+'Tbody').innerHTML = state.parts[cons].length ? state.parts[cons].map((p,idx)=>`
+        <tr><td>${p.name}</td>
+        <td>${p.type==='dual'? `مزدوجة (${p.labelA}/${p.labelB})` : 'مفردة'}</td>
+        <td>${money(p.retail)}</td><td>${money(p.commercial)}</td>
+        <td>${p.qty ?? '—'}</td>
+        <td><button class="btn btn-ghost btn-sm" type="button" data-edit="${cons}:${idx}">تعديل</button> <button class="btn btn-danger btn-sm" type="button" data-del="${cons}:${idx}">حذف</button></td></tr>`).join('')
+        : `<tr><td colspan="6"><div class="empty-state">لا توجد قطع بعد</div></td></tr>`;
+    });
+    panel.querySelectorAll('[data-del]').forEach(b=>{
+      b.addEventListener('click', ()=>{
+        const [cons, idx] = b.dataset.del.split(':');
+        state.parts[cons].splice(idx,1); draw(); toast('تم حذف القطعة'); scheduleSave();
+      });
+    });
+    panel.querySelectorAll('[data-edit]').forEach(b=>{
+      b.addEventListener('click', ()=>{
+        const [cons, idx] = b.dataset.edit.split(':');
+        openPartModal(cons, Number(idx));
+      });
+    });
+  }
+  function openPartModal(cons, editIdx){
+    const isEdit = editIdx!=null;
+    const p = isEdit? state.parts[cons][editIdx] : null;
+    openModal(`
+      <h3>${isEdit? 'تعديل قطعة — ':'إضافة قطعة غيار — '}${cons==='ps5'?'فايف':'فور'}</h3>
+      <div class="field" style="margin-bottom:12px;"><label>اسم القطعة</label><input id="pp_name" value="${p?p.name:''}"></div>
+      <div class="form-grid" style="margin-bottom:12px;">
+        <div class="field"><label>السعر القطاعي</label><input type="number" id="pp_retail" value="${p?p.retail:''}"></div>
+        <div class="field"><label>السعر التجاري</label><input type="number" id="pp_commercial" value="${p?p.commercial:''}"></div>
+      </div>
+      <div class="field" style="margin-bottom:12px;"><label>العدد (اختياري)</label><input type="number" id="pp_qty" value="${p && p.qty!=null? p.qty : ''}"></div>
+      <div class="field" style="margin-bottom:12px;"><label>نوع القطعة</label>
+        <select id="pp_type">
+          <option value="single" ${p && p.type==='single'?'selected':''}>قطعة واحدة</option>
+          <option value="dual" ${p && p.type==='dual'?'selected':''}>قطعة مزدوجة الاستخدام (تركب في مكانين R/L)</option>
+        </select>
+      </div>
+      <div id="pp_labels" style="${p && p.type==='dual'?'':'display:none;'}" class="form-grid">
+        <div class="field"><label>مسمى الموضع الأول</label><input id="pp_labelA" value="${p&&p.labelA?p.labelA:'R'}"></div>
+        <div class="field"><label>مسمى الموضع الثاني</label><input id="pp_labelB" value="${p&&p.labelB?p.labelB:'L'}"></div>
+      </div>
+      <div class="modal-actions"><button class="btn btn-ghost" type="button" onclick="closeModal()">إلغاء</button><button class="btn btn-primary" type="button" id="pp_save">${isEdit?'حفظ التعديلات':'إضافة'}</button></div>
+    `, true);
+    document.getElementById('pp_type').addEventListener('change', e=>{
+      document.getElementById('pp_labels').style.display = e.target.value==='dual' ? 'grid':'none';
+    });
+    document.getElementById('pp_save').addEventListener('click', ()=>{
+      const name = document.getElementById('pp_name').value.trim();
+      if(!name){ toast('من فضلك أدخل اسم القطعة'); return; }
+      const type = document.getElementById('pp_type').value;
+      const qtyVal = document.getElementById('pp_qty').value;
+      const payload = {
+        name,
+        retail:Number(document.getElementById('pp_retail').value)||0,
+        commercial:Number(document.getElementById('pp_commercial').value)||0,
+        qty: qtyVal? Number(qtyVal) : null,
+        type,
+        labelA: type==='dual'? (document.getElementById('pp_labelA').value||'R'):null,
+        labelB: type==='dual'? (document.getElementById('pp_labelB').value||'L'):null
+      };
+      if(isEdit){ Object.assign(p, payload); toast('تم حفظ تعديلات القطعة'); }
+      else { payload.id = state.partSeq++; state.parts[cons].push(payload); toast('تمت إضافة القطعة'); }
+      closeModal(); draw(); scheduleSave();
+    });
+  }
+  document.getElementById('addPartPs4').addEventListener('click', ()=>openPartModal('ps4', null));
+  document.getElementById('addPartPs5').addEventListener('click', ()=>openPartModal('ps5', null));
+  draw();
+}
+
+/* ---------- سجل الفواتير ---------- */
+function renderInvoiceLog(panel){
+  panel.innerHTML = `
+    <div class="panel-head"><div><h2>📚 سجل الفواتير</h2><div class="ph-sub">جميع فواتير الصيانة المسجلة</div></div></div>
+    <div class="search-bar">
+      <input id="logSearch" placeholder="ابحث برقم الفاتورة أو اسم العميل...">
+      <input type="date" id="logDate" style="max-width:170px;">
+      <select id="logStatus" style="min-width:180px">
+        <option value="">كل الحالات</option>
+        ${Object.entries(statusMeta).map(([k,v])=>`<option value="${k}">${v.label}</option>`).join('')}
+      </select>
+    </div>
+    <div class="table-wrap"><table><thead><tr><th>الرقم</th><th>التاريخ</th><th>العميل</th><th>النوع</th><th>الإجمالي</th><th>الحالة</th><th></th></tr></thead><tbody id="logTbody"></tbody></table></div>`;
+  function draw(){
+    const f = document.getElementById('logSearch').value;
+    const d = document.getElementById('logDate').value;
+    const s = document.getElementById('logStatus').value;
+    const rows = state.invoices.filter(i=> (i.id.includes(f)||i.customer.includes(f)) && (!d || i.date===d) && (!s || i.status===s));
+    document.getElementById('logTbody').innerHTML = rows.length ? rows.map(i=>`
+      <tr><td>${i.id}</td><td>${i.date}</td><td>${i.customer}</td><td>${i.type}</td><td>${money(calcInvoiceTotal(i))}</td>
+      <td><span class="badge ${statusMeta[i.status].cls}">${statusMeta[i.status].label}</span></td>
+      <td><button class="btn btn-ghost btn-sm" type="button" data-details="${i.id}">تفاصيل</button></td></tr>`).join('')
+      : `<tr><td colspan="7"><div class="empty-state"><div class="es-icon">📭</div>لا توجد فواتير مطابقة</div></td></tr>`;
+    document.getElementById('logTbody').querySelectorAll('[data-details]').forEach(b=>{
+      b.addEventListener('click', ()=> openInvoiceDetails(b.dataset.details, draw));
+    });
+  }
+  document.getElementById('logSearch').addEventListener('input', draw);
+  document.getElementById('logDate').addEventListener('change', draw);
+  document.getElementById('logStatus').addEventListener('change', draw);
+  draw();
+}
+
+/* ---------- تفاصيل فاتورة: دفع / تسليم / إرسال للعميل ---------- */
+function openInvoiceDetails(id, refreshCb){
+  const inv = state.invoices.find(i=>i.id===id);
+  if(!inv) return;
+  paintDetails();
+  function paintDetails(){
+    const total = calcInvoiceTotal(inv);
+    inv.paid = inv.paid||0; inv.due = inv.due!=null? inv.due : total; inv.discount = inv.discount||0; inv.discountPercent = inv.discountPercent||0;
+    inv.controllers.forEach(c=>{ if(c.delivered===undefined) c.delivered=false; });
+    const deliveredCount = inv.controllers.filter(c=>c.delivered).length;
+    const totalCtrl = inv.controllers.length;
+    const notYetDelivered = inv.controllers.filter(c=>!c.delivered);
+    openModal(`
+      <h3>تفاصيل الفاتورة ${inv.id}</h3>
+      <div style="font-size:13px; color:var(--text-2); line-height:2;">
+        <div><b>العميل:</b> ${inv.customer} — ${inv.phone||'بدون رقم'}</div>
+        <div><b>التاريخ:</b> ${inv.date} &nbsp; <b>النوع:</b> ${inv.type}</div>
+        <div><b>عدد الدراعات:</b> فايف ${inv.countPS5||0} / فور ${inv.countPS4||0}</div>
+        <div><b>الحالة:</b> <span class="badge ${statusMeta[inv.status].cls}">${statusMeta[inv.status].label}</span></div>
+        <div><b>الإجمالي:</b> ${money(total)} &nbsp; <b>المدفوع:</b> ${money(inv.paid)} &nbsp; <b>المتبقي:</b> ${money(inv.due)}</div>
+        ${inv.discount>0? `<div><b>خصم مسجل:</b> ${money(inv.discount)} (${inv.discountPercent}%)</div>`:''}
+      </div>
+      <div style="border-top:1px solid var(--border); margin:14px 0; padding-top:14px;">
+        <label style="display:block; font-size:12.5px; color:var(--text-2); margin-bottom:6px;">تسجيل دفعة</label>
+        <div class="form-grid" style="margin-bottom:10px;">
+          <div class="field"><label>المبلغ المدفوع</label><input type="number" id="pay_amount" value="${inv.paid||''}"></div>
+          <div class="field"><label>نوع السداد</label>
+            <select id="pay_type">
+              <option value="مدفوع">مدفوع بالكامل (والباقي يُحسب خصم)</option>
+              <option value="أجل">أجل (الباقي دين على العميل)</option>
+              <option value="غير مدفوع">غير مدفوع</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-sm" type="button" id="savePayBtn">💾 حفظ الدفع</button>
+      </div>
+      ${totalCtrl>0 ? `
+      <div style="border-top:1px solid var(--border); margin:14px 0; padding-top:14px;">
+        <label style="display:block; font-size:12.5px; color:var(--text-2); margin-bottom:6px;">تسليم دراعات — تم تسليم ${deliveredCount} من ${totalCtrl}</label>
+        ${notYetDelivered.length? `
+          <button class="btn btn-ghost btn-sm" type="button" id="deliverAllBtn" style="margin-bottom:10px;">📦 تسليم كل الدراعات المتبقية (${notYetDelivered.length})</button>
+          <div class="checkbox-list">
+            ${notYetDelivered.map(c=>`<div class="cb-item"><label><input type="checkbox" class="deliver-ctrl-cb" value="${c.uid}"> <span class="console-badge console-${c.console}">${c.console==='ps5'?'فايف':'فور'}</span> ${c.code||'—'}</label></div>`).join('')}
+          </div>
+          <button class="btn btn-primary btn-sm" type="button" id="deliverSelectedBtn" style="margin-top:10px;">تسليم الدراعات المحددة</button>
+        ` : `<div style="font-size:12.5px; color:var(--good);">✅ كل الدراعات تم تسليمها فعليًا</div>`}
+      </div>` : ''}
+      <div style="border-top:1px solid var(--border); margin:14px 0; padding-top:14px;">
+        <label style="display:block; font-size:12.5px; color:var(--text-2); margin-bottom:6px;">تحديث حالة الفاتورة النهائية (بعد تسليم كل الدراعات)</label>
+        <div class="form-grid" style="margin-bottom:10px;">
+          <div class="field full">
+            <select id="deliver_status">
+              <option value="delivered_paid">تم التسليم مدفوع</option>
+              <option value="delivered_deferred">تم التسليم (أجل)</option>
+              <option value="delivered_unpaid">تم التسليم غير مدفوع</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn btn-ghost btn-sm" type="button" id="deliverBtn">📦 تأكيد الحالة النهائية</button>
+      </div>
+      <div class="modal-actions" style="justify-content:space-between; flex-wrap:wrap;">
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button class="btn btn-ghost" type="button" id="viewInvoiceBtn">🔍 عرض الفاتورة</button>
+          <button class="btn btn-ghost" type="button" id="exportPdfBtn">📄 تصدير PDF</button>
+          <button class="btn btn-ghost" type="button" id="sendCustomerBtn">📲 إرسال للعميل</button>
+        </div>
+        <button class="btn btn-ghost" type="button" onclick="closeModal()">إغلاق</button>
+      </div>
+    `, true);
+
+    document.getElementById('savePayBtn').addEventListener('click', ()=>{
+      const total2 = calcInvoiceTotal(inv);
+      const paidAmt = Number(document.getElementById('pay_amount').value)||0;
+      const type = document.getElementById('pay_type').value;
+      const remaining = Math.max(0, total2 - paidAmt);
+      inv.paymentType = type;
+      if(type==='أجل'){
+        inv.paid = paidAmt; inv.due = remaining; inv.discount=0; inv.discountPercent=0;
+        if(remaining>0) state.ledger.push({customer:inv.customer, invoiceId:inv.id, amount:remaining, type:'أجل', date:todayStr()});
+      } else if(type==='مدفوع'){
+        inv.paid = total2; inv.due = 0; inv.discount = remaining; inv.discountPercent = total2>0? Math.round(remaining/total2*100):0;
+      } else {
+        inv.paid = 0; inv.due = total2; inv.discount=0; inv.discountPercent=0;
+        if(total2>0) state.ledger.push({customer:inv.customer, invoiceId:inv.id, amount:total2, type:'غير مدفوع', date:todayStr()});
+      }
+      toast('تم حفظ بيانات الدفع');
+      scheduleSave();
+      paintDetails();
+      if(refreshCb) refreshCb();
+    });
+    document.getElementById('deliverBtn').addEventListener('click', ()=>{
+      inv.status = document.getElementById('deliver_status').value;
+      toast('تم تحديث حالة الفاتورة إلى: ' + statusMeta[inv.status].label);
+      scheduleSave();
+      paintDetails();
+      if(refreshCb) refreshCb();
+    });
+    const deliverAllBtn = document.getElementById('deliverAllBtn');
+    if(deliverAllBtn) deliverAllBtn.addEventListener('click', ()=>{
+      inv.controllers.forEach(c=>{ if(!c.delivered){ c.delivered=true; c.deliveredAt=todayStr(); } });
+      toast('تم تسليم كل الدراعات المتبقية');
+      scheduleSave();
+      paintDetails();
+      if(refreshCb) refreshCb();
+    });
+    const deliverSelectedBtn = document.getElementById('deliverSelectedBtn');
+    if(deliverSelectedBtn) deliverSelectedBtn.addEventListener('click', ()=>{
+      const checked = Array.from(document.querySelectorAll('.deliver-ctrl-cb:checked')).map(cb=>cb.value);
+      if(!checked.length){ toast('اختر دراع واحد على الأقل'); return; }
+      checked.forEach(uid=>{
+        const c = inv.controllers.find(x=>x.uid==uid);
+        if(c){ c.delivered=true; c.deliveredAt=todayStr(); }
+      });
+      toast('تم تسليم ' + checked.length + ' دراع بنجاح');
+      scheduleSave();
+      paintDetails();
+      if(refreshCb) refreshCb();
+    });
+    document.getElementById('viewInvoiceBtn').addEventListener('click', ()=> openInvoiceViewModal(inv));
+    document.getElementById('exportPdfBtn').addEventListener('click', ()=> exportInvoicePDF(inv));
+    document.getElementById('sendCustomerBtn').addEventListener('click', ()=>{
+      const data = {customer:inv.customer, code:inv.id, date:inv.date, type:inv.type, phone:inv.phone||'—', controllers:inv.controllers.length, total: money(calcInvoiceTotal(inv)), shopPhone:state.settings.shopPhone};
+      const msg = applyTemplate(state.settings.templates.invoice, data);
+      sendWhatsApp(inv.phone, msg);
+    });
+  }
+}
+
+/* ---------- الفواتير المعلقة ---------- */
+function renderPending(panel){
+  const notDone = [];
+  const doneNotDelivered = [];
+  state.invoices.forEach(inv=>{
+    if(inv.status.startsWith('delivered')) return;
+    const missingPS5 = Math.max(0, (inv.countPS5||0) - inv.controllers.filter(c=>c.console==='ps5').length);
+    const missingPS4 = Math.max(0, (inv.countPS4||0) - inv.controllers.filter(c=>c.console==='ps4').length);
+    for(let i=0;i<missingPS5;i++) notDone.push({inv, c:{console:'ps5', code:null, items:[]}, virtual:true});
+    for(let i=0;i<missingPS4;i++) notDone.push({inv, c:{console:'ps4', code:null, items:[]}, virtual:true});
+    inv.controllers.forEach(c=>{
+      if(c.delivered) return;
+      if(c.items.length===0) notDone.push({inv,c,virtual:false});
+      else doneNotDelivered.push({inv,c});
+    });
+  });
+  panel.innerHTML = `
+    <div class="panel-head"><div><h2>⏳ الفواتير المعلقة</h2><div class="ph-sub">كل الدراعات التي لم تُصلح بعد (حتى لو لسه ما اتسجلتش بكود)، والدراعات التي أُصلحت ولم تُسلَّم بعد</div></div></div>
+    <h3 style="margin:6px 0 12px; font-size:15px;">🔧 دراعات لم تُصلح بعد (${notDone.length})</h3>
+    <div class="table-wrap"><table><thead><tr><th>الفاتورة</th><th>العميل</th><th>الهاتف</th><th>نوع الدراع</th><th>كود الدراع</th><th>الحالة</th></tr></thead><tbody>
+      ${notDone.length? notDone.map(r=>`
+        <tr><td>${r.inv.id}</td><td>${r.inv.customer}</td><td>${r.inv.phone||'—'}</td><td><span class="console-badge console-${r.c.console}">${r.c.console==='ps5'?'فايف':'فور'}</span></td><td>${r.c.code||'—'}</td><td><span class="badge badge-wait">${r.virtual? 'لم يُسجل بعد':'بانتظار الإصلاح'}</span></td></tr>`).join('')
+      : '<tr><td colspan="6"><div class="empty-state"><div class="es-icon">✅</div>لا يوجد دراعات بانتظار الإصلاح</div></td></tr>'}
+    </tbody></table></div>
+
+    <h3 style="margin:26px 0 12px; font-size:15px;">📦 دراعات تم إصلاحها ولم تُسلَّم بعد (${doneNotDelivered.length})</h3>
+    <div class="table-wrap"><table><thead><tr><th>الفاتورة</th><th>العميل</th><th>الهاتف</th><th>نوع الدراع</th><th>كود الدراع</th><th>إجمالي الدراع</th><th>الحالة</th></tr></thead><tbody>
+      ${doneNotDelivered.length? doneNotDelivered.map(r=>`
+        <tr><td>${r.inv.id}</td><td>${r.inv.customer}</td><td>${r.inv.phone||'—'}</td><td><span class="console-badge console-${r.c.console}">${r.c.console==='ps5'?'فايف':'فور'}</span></td><td>${r.c.code||'—'}</td><td>${money(calcControllerSubtotal(r.c))}</td><td><span class="badge badge-ready">جاهز للتسليم</span></td></tr>`).join('')
+      : '<tr><td colspan="7"><div class="empty-state"><div class="es-icon">✅</div>لا يوجد دراعات جاهزة بانتظار التسليم</div></td></tr>'}
+    </tbody></table></div>`;
+}
+
+/* ---------- الاستلام والتسليم ---------- */
+function renderDelivery(panel){
+  panel.innerHTML = `
+    <div class="panel-head"><div><h2>🔁 الاستلام والتسليم</h2><div class="ph-sub">تتبع حالة كل فاتورة من الاستلام حتى التسليم</div></div></div>
+    <div class="table-wrap"><table><thead><tr><th>الرقم</th><th>العميل</th><th>الإجمالي</th><th>الحالة الحالية</th><th>تحديث الحالة</th></tr></thead><tbody id="delTbody"></tbody></table></div>`;
+  function draw(){
+    document.getElementById('delTbody').innerHTML = state.invoices.map(i=>`
+      <tr><td>${i.id}</td><td>${i.customer}</td><td>${money(calcInvoiceTotal(i))}</td>
+      <td><span class="badge ${statusMeta[i.status].cls}">${statusMeta[i.status].label}</span></td>
+      <td>
+        <select data-id="${i.id}">
+          ${Object.entries(statusMeta).map(([k,v])=>`<option value="${k}" ${i.status===k?'selected':''}>${v.label}</option>`).join('')}
+        </select>
+      </td></tr>`).join('');
+    document.getElementById('delTbody').querySelectorAll('select').forEach(s=>{
+      s.addEventListener('change', ()=>{
+        const inv = state.invoices.find(i=>i.id===s.dataset.id);
+        inv.status = s.value; draw(); toast('تم تحديث حالة ' + inv.id + ' إلى: ' + statusMeta[inv.status].label); scheduleSave();
+      });
+    });
+  }
+  draw();
+}
+
+/* ---------- حسابات العملاء ---------- */
+function renderCustomerAccounts(panel){
+  panel.innerHTML = `
+    <div class="panel-head"><div><h2>💰 حسابات العملاء</h2><div class="ph-sub">متابعة المبالغ الآجلة وغير المدفوعة على كل عميل، ومصدر كل مبلغ</div></div></div>
+    <div class="table-wrap"><table><thead><tr><th>العميل</th><th>رقم الهاتف</th><th>إجمالي المستحق</th><th></th></tr></thead><tbody id="custTbody"></tbody></table></div>`;
+  function draw(){
+    document.getElementById('custTbody').innerHTML = state.customers.length ? state.customers.map(c=>{
+      const entries = state.ledger.filter(l=>l.customer===c.name);
+      const total = entries.reduce((s,l)=>s+l.amount,0);
+      return `<tr><td>${c.name}</td><td>${c.phone||'—'}</td>
+      <td style="color:${total>0?'var(--danger)':'var(--good)'}; font-weight:700;">${money(total)}</td>
+      <td><button class="btn btn-ghost btn-sm" type="button" data-view="${c.name}">التفاصيل</button></td></tr>`;
+    }).join('') : `<tr><td colspan="4"><div class="empty-state">لا يوجد عملاء بعد</div></td></tr>`;
+    document.getElementById('custTbody').querySelectorAll('[data-view]').forEach(b=>{
+      b.addEventListener('click', ()=> openCustomerLedger(b.dataset.view));
+    });
+  }
+  function openCustomerLedger(name){
+    const entries = state.ledger.filter(l=>l.customer===name);
+    const total = entries.reduce((s,l)=>s+l.amount,0);
+    openModal(`
+      <h3>حساب العميل: ${name}</h3>
+      <div style="margin-bottom:12px; font-weight:700;">إجمالي المستحق: <span style="color:${total>0?'var(--danger)':'var(--good)'}">${money(total)}</span></div>
+      <div class="table-wrap"><table><thead><tr><th>الفاتورة</th><th>النوع</th><th>المبلغ</th><th>التاريخ</th></tr></thead><tbody>
+        ${entries.length? entries.map(l=>`<tr><td>${l.invoiceId}</td><td>${l.type}</td><td>${money(l.amount)}</td><td>${l.date}</td></tr>`).join('') : '<tr><td colspan="4"><div class="empty-state">لا يوجد مستحقات</div></td></tr>'}
+      </tbody></table></div>
+      <div style="border-top:1px solid var(--border); margin:14px 0; padding-top:14px;">
+        <label style="display:block; font-size:12.5px; color:var(--text-2); margin-bottom:6px;">تسجيل دفعة من العميل</label>
+        <div style="display:flex; gap:8px;">
+          <input type="number" id="pay_customer_amount" placeholder="المبلغ المدفوع" style="flex:1;">
+          <button class="btn btn-primary btn-sm" type="button" id="payCustomerBtn">تسجيل الدفعة</button>
+        </div>
+      </div>
+      <div class="modal-actions"><button class="btn btn-ghost" type="button" onclick="closeModal()">إغلاق</button></div>
+    `, true);
+    document.getElementById('payCustomerBtn').addEventListener('click', ()=>{
+      const amt = Number(document.getElementById('pay_customer_amount').value)||0;
+      if(amt<=0){ toast('أدخل مبلغ صحيح'); return; }
+      state.ledger.push({customer:name, invoiceId:'دفعة نقدية', amount:-amt, type:'دفعة', date:todayStr()});
+      scheduleSave();
+      toast('تم تسجيل الدفعة');
+      openCustomerLedger(name);
+      draw();
+    });
+  }
+  draw();
+}
+
+/* ---------- التقارير (تجاري مقابل قطاعي) ---------- */
+function renderReports(panel){
+  function recomputeInvoice(inv, forceType){
+    let sum = 0;
+    inv.controllers.forEach(c=>{
+      c.items.forEach(it=>{
+        if(it.kind==='service'){ sum += it.price; return; }
+        const list = state.parts[c.console] || [];
+        const part = list.find(p=>p.name===it.name);
+        sum += part ? (forceType==='تجاري'? part.commercial : part.retail) : it.price;
+      });
+    });
+    return sum;
+  }
+  const reportA = state.invoices.reduce((s,i)=> s + recomputeInvoice(i,'تجاري'), 0);
+  const retailInvoices = state.invoices.filter(i=>i.type==='قطاعي');
+  const reportB = retailInvoices.reduce((s,i)=> s + recomputeInvoice(i,'قطاعي'), 0);
+  const diff = reportA - reportB;
+  panel.innerHTML = `
+    <div class="panel-head"><div><h2>📈 التقارير</h2><div class="ph-sub">مقارنة الإيراد كلو كتسعير تجاري، مقابل الفواتير القطاعية الأصلية فقط</div></div></div>
+    <div class="stat-grid stat-grid-3">
+      <div class="stat-card"><div class="st-label">كل الفواتير باعتبارها تجاري</div><div class="st-value">${money(reportA)}</div><div class="st-trend">${state.invoices.length} فاتورة</div></div>
+      <div class="stat-card"><div class="st-label">الفواتير القطاعية الأصلية فقط</div><div class="st-value">${money(reportB)}</div><div class="st-trend">${retailInvoices.length} فاتورة</div></div>
+      <div class="stat-card"><div class="st-label">الفرق بين التقريرين</div><div class="st-value" style="color:var(--cyan)">${money(diff)}</div><div class="st-trend">تأثير التسعير التجاري</div></div>
+    </div>
+    <div class="empty-state" style="padding:20px; text-align:right; color:var(--text-3); font-size:12.5px;">التقرير الأول يعيد حساب كل الفواتير (بكل أنواعها) بافتراض أنها كلها تجاري. التقرير الثاني يحسب فقط الفواتير التي كانت أصلاً قطاعي بسعرها القطاعي. الفرق بينهما يوضح أثر التسعير التجاري على الإيراد.</div>`;
+}
+
+/* ---------- الإحصائيات والتقارير ---------- */
+function renderStats(panel){
+  const total = state.invoices.length;
+  const revenue = state.invoices.reduce((s,i)=>s+calcInvoiceTotal(i),0) + state.sales.reduce((s,i)=>s+i.price*i.qty,0);
+  const ready = state.invoices.filter(i=>i.status==='fixed').length;
+  const byStatus = Object.keys(statusMeta).map(k=>({k, n: state.invoices.filter(i=>i.status===k).length}));
+  const maxN = Math.max(1, ...byStatus.map(b=>b.n));
+  panel.innerHTML = `
+    <div class="panel-head"><div><h2>📊 الإحصائيات والتقارير</h2><div class="ph-sub">نظرة عامة على أداء مركز الصيانة</div></div></div>
+    <div class="stat-grid">
+      <div class="stat-card"><div class="st-label">إجمالي الفواتير</div><div class="st-value">${total}</div><div class="st-trend">هذا الشهر</div></div>
+      <div class="stat-card"><div class="st-label">إجمالي الإيرادات</div><div class="st-value">${money(revenue)}</div><div class="st-trend">صيانة + مبيعات</div></div>
+      <div class="stat-card"><div class="st-label">تم إصلاحها</div><div class="st-value">${ready}</div><div class="st-trend" style="color:var(--cyan)">بانتظار التسليم</div></div>
+      <div class="stat-card"><div class="st-label">عدد العملاء</div><div class="st-value">${state.customers.length}</div><div class="st-trend">مسجلين بالنظام</div></div>
+    </div>
+    <div class="panel" style="box-shadow:none;">
+      <h3 style="margin-bottom:14px; font-size:15px;">توزيع الفواتير حسب الحالة</h3>
+      <div class="bars">
+        ${byStatus.map(b=>`
+          <div class="bar-col">
+            <div style="font-size:12px;color:var(--text-2)">${b.n}</div>
+            <div class="bar" style="height:${(b.n/maxN*120)||4}px"></div>
+            <div class="bar-label">${statusMeta[b.k].label}</div>
+          </div>`).join('')}
+      </div>
+    </div>`;
+}
+
+/* ---------- إدارة المستخدمين ---------- */
+function renderUsers(panel){
+  panel.innerHTML = `
+    <div class="panel-head">
+      <div><h2>👥 إدارة المستخدمين</h2><div class="ph-sub">حسابات الدخول وصلاحيات الوصول لكل صفحة</div></div>
+      <button class="btn btn-primary btn-sm" type="button" id="addUser">➕ إضافة مستخدم</button>
+    </div>
+    <div class="table-wrap"><table><thead><tr><th>الاسم</th><th>اليوزر</th><th>الدور الوظيفي</th><th>الصلاحية</th><th>الصفحات المتاحة</th><th></th></tr></thead><tbody id="usersTbody"></tbody></table></div>`;
+  function draw(){
+    document.getElementById('usersTbody').innerHTML = state.users.map((u,idx)=>`
+      <tr><td>${u.name}</td><td>${u.username}</td><td>${u.role}</td>
+      <td><span class="role-tag ${u.admin?'role-admin':''}">${u.admin?'مدير (الكل)':'موظف'}</span></td>
+      <td style="font-size:12px; color:var(--text-3); max-width:220px;">${u.admin? 'كل الصفحات' : ((u.permissions||[]).map(p=>(allModules.find(m=>m.id===p)||{}).label || p).join('، ') || 'بدون صلاحيات')}</td>
+      <td>${idx===0? '' : `<button class="btn btn-ghost btn-sm" type="button" data-edit="${idx}">تعديل</button> <button class="btn btn-danger btn-sm" type="button" data-del="${idx}">إزالة</button>`}</td></tr>`).join('');
+    document.getElementById('usersTbody').querySelectorAll('[data-del]').forEach(b=>b.addEventListener('click', ()=>{
+      state.users.splice(b.dataset.del,1); draw(); toast('تم إزالة المستخدم'); scheduleSave(); populateLoginUserSelect();
+    }));
+    document.getElementById('usersTbody').querySelectorAll('[data-edit]').forEach(b=>b.addEventListener('click', ()=> openUserModal(Number(b.dataset.edit))));
+  }
+
+  function openUserModal(editIdx){
+    const isEdit = editIdx!=null;
+    const u = isEdit? state.users[editIdx] : null;
+    openModal(`<h3>${isEdit? 'تعديل مستخدم: '+u.name : 'إضافة مستخدم جديد'}</h3>
+      <div class="field" style="margin-bottom:12px"><label>الاسم</label><input id="nu_name" value="${u?u.name:''}"></div>
+      <div class="form-grid" style="margin-bottom:12px;">
+        <div class="field"><label>اسم الدخول (يوزر)</label><input id="nu_username" value="${u?u.username:''}"></div>
+        <div class="field"><label>كلمة المرور</label><input id="nu_password" type="text" value="${u?u.password:''}"></div>
+      </div>
+      <div class="field" style="margin-bottom:12px"><label>الدور الوظيفي</label><input id="nu_role" value="${u?u.role:''}" placeholder="مثال: فني صيانة دراعات"></div>
+      <div class="field" style="margin-bottom:12px"><label>الصلاحية</label>
+        <select id="nu_admin">
+          <option value="0" ${u && !u.admin?'selected':''}>موظف (صلاحيات محددة)</option>
+          <option value="1" ${u && u.admin?'selected':''}>مدير (كل الصلاحيات)</option>
+        </select>
+      </div>
+      <div class="field" id="nu_permsWrap" style="${u && u.admin?'display:none;':''}">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+          <label style="margin:0;">الصفحات المسموح بالدخول عليها</label>
+          <button type="button" class="btn btn-ghost btn-sm" id="nu_selectAll" style="padding:4px 10px;">تحديد الكل</button>
+        </div>
+        <div class="checkbox-list">
+          ${allModules.map(m=>`<div class="cb-item"><label><input type="checkbox" value="${m.id}" class="nu-perm" ${u && (u.permissions||[]).includes(m.id)?'checked':''}> ${m.label}</label></div>`).join('')}
+        </div>
+      </div>
+      <div class="modal-actions"><button class="btn btn-ghost" type="button" onclick="closeModal()">إلغاء</button><button class="btn btn-primary" type="button" id="nu_save">${isEdit?'حفظ التعديلات':'إضافة'}</button></div>`, true);
+    document.getElementById('nu_admin').addEventListener('change', e=>{
+      document.getElementById('nu_permsWrap').style.display = e.target.value==='1' ? 'none':'block';
+    });
+    document.getElementById('nu_selectAll').addEventListener('click', ()=>{
+      const boxes = document.querySelectorAll('.nu-perm');
+      const allChecked = Array.from(boxes).every(cb=>cb.checked);
+      boxes.forEach(cb=> cb.checked = !allChecked);
+    });
+    document.getElementById('nu_save').addEventListener('click', ()=>{
+      const name = document.getElementById('nu_name').value.trim();
+      const username = document.getElementById('nu_username').value.trim();
+      const password = document.getElementById('nu_password').value.trim();
+      if(!name || !username || !password){ toast('من فضلك أكمل الاسم واليوزر وكلمة المرور'); return; }
+      const dup = state.users.find((usr,i)=> usr.username===username && i!==editIdx);
+      if(dup){ toast('اسم الدخول ده مستخدم بالفعل'); return; }
+      const isAdmin = document.getElementById('nu_admin').value==='1';
+      const perms = Array.from(document.querySelectorAll('.nu-perm:checked')).map(cb=>cb.value);
+      const payload = {name, username, password, role:document.getElementById('nu_role').value||'موظف', admin:isAdmin, permissions:perms};
+      if(isEdit){ Object.assign(state.users[editIdx], payload); toast('تم حفظ تعديلات المستخدم'); }
+      else { state.users.push(payload); toast('تمت إضافة المستخدم'); }
+      closeModal(); draw(); scheduleSave(); populateLoginUserSelect();
+    });
+  }
+  document.getElementById('addUser').addEventListener('click', ()=> openUserModal(null));
+  draw();
+}
+
+/* ---------- الإعدادات: قوالب الرسائل ---------- */
+function renderSettings(panel){
+  panel.innerHTML = `
+    <div class="panel-head"><div><h2>⚙️ الإعدادات</h2><div class="ph-sub">تحكم في نصوص رسائل واتساب، والحفظ السحابي، والنسخ الاحتياطي</div></div></div>
+
+    <div style="border:1px solid var(--border); border-radius:14px; padding:16px; margin-bottom:20px; background:var(--surface-2);">
+      <h3 style="font-size:15px; margin-bottom:10px;">☁️ الحفظ السحابي</h3>
+      <div style="font-size:13px; color:var(--text-2); margin-bottom:12px;">
+        الحالة الحالية: <span class="sync-badge" style="display:inline-flex;"><span class="sync-dot ${cloudEnabled?'on':'off'}"></span>${cloudEnabled? 'متصل — بياناتك بتتحفظ تلقائي وتتزامن بين كل الأجهزة':'غير متصل — البيانات في هذا الجهاز فقط ومش هتتحفظ بعد إغلاق الصفحة'}</span>
+      </div>
+      ${cloudEnabled? `<button class="btn btn-ghost btn-sm" type="button" id="forceSaveBtn">💾 حفظ الآن</button>` : `<div style="font-size:12.5px; color:var(--text-3);">لربط الموقع بقاعدة بيانات حقيقية، افتح ملف الموقع وعدّل قيم <b>firebaseConfig</b> في أول السكريبت ببيانات مشروع Firebase الخاص بيك.</div>`}
+    </div>
+
+    <div style="border:1px solid var(--border); border-radius:14px; padding:16px; margin-bottom:20px; background:var(--surface-2);">
+      <h3 style="font-size:15px; margin-bottom:10px;">🗄️ نسخة احتياطية يدوية</h3>
+      <div style="font-size:12.5px; color:var(--text-3); margin-bottom:12px;">تنزيل كل بيانات النظام كملف واحد على جهازك، أو استعادتها من ملف سابق — تعمل حتى لو مفيش اتصال سحابي.</div>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <button class="btn btn-primary btn-sm" type="button" id="exportBtn">⬇️ تنزيل نسخة احتياطية</button>
+        <label class="btn btn-ghost btn-sm" style="cursor:pointer;">⬆️ استعادة من نسخة<input type="file" accept="application/json" id="importFile" style="display:none;"></label>
+      </div>
+    </div>
+
+    <div style="border:1px solid var(--border); border-radius:14px; padding:16px; margin-bottom:20px; background:var(--surface-2);">
+      <h3 style="font-size:15px; margin-bottom:10px;">📦 نسخ احتياطية على Firebase</h3>
+      <div style="font-size:12.5px; color:var(--text-3); margin-bottom:12px;">نسخ مخزّنة داخل Firebase نفسه (منفصلة عن البيانات الحية الجارية) — بياخد نسخة تلقائية أول مرة تفتح فيها الموقع كل يوم، وتقدر كمان تاخد نسخة يدوية وقت ما تحب وترجع لأي نسخة سابقة.</div>
+      <button class="btn btn-primary btn-sm" type="button" id="snapNowBtn" ${cloudEnabled?'':'disabled'}>📸 حفظ نسخة الآن</button>
+      <div id="snapList" style="margin-top:14px;">${cloudEnabled? '<div style="color:var(--text-3); font-size:12.5px;">جاري تحميل النسخ...</div>' : '<div class="empty-state" style="padding:20px;">يتطلب ربط الموقع بـ Firebase أولاً</div>'}</div>
+    </div>
+
+    ${state.currentUser && state.currentUser.admin ? `
+    <div style="border:1px solid var(--danger); border-radius:14px; padding:16px; margin-bottom:20px; background:rgba(255,84,112,.06);">
+      <h3 style="font-size:15px; margin-bottom:10px; color:var(--danger);">⚠️ منطقة خطر — مسح كل البيانات</h3>
+      <div style="font-size:12.5px; color:var(--text-3); margin-bottom:12px;">بيمسح كل الفواتير والعملاء وقطع الغيار والمستخدمين نهائيًا (محليًا وعلى Firebase)، ويرجّع فقط حساب الطوارئ admin. إجراء لا يمكن التراجع عنه — خذ نسخة احتياطية قبلها لو مش متأكد.</div>
+      <button class="btn btn-danger btn-sm" type="button" id="resetAllBtn">🗑️ مسح كل البيانات والبدء من جديد</button>
+    </div>` : ''}
+
+    <div class="field" style="margin-bottom:16px;">
+      <label>رقم هاتف المركز (يظهر على تيكت الدراع والريسيت)</label>
+      <input id="shop_phone" value="${state.settings.shopPhone||''}" placeholder="01xxxxxxxxx">
+    </div>
+
+    <div class="field" style="margin-bottom:16px;">
+      <label>قالب رسالة الاستلام (تُرسل من صفحة فاتورة جديدة)</label>
+      <textarea id="tpl_intake" rows="6">${state.settings.templates.intake}</textarea>
+      <div style="color:var(--text-3); font-size:11.5px; margin-top:6px;">المتغيرات المتاحة: {{customer}} {{code}} {{date}} {{type}} {{ps4}} {{ps5}} {{phone}} {{shopPhone}}</div>
+    </div>
+    <div class="field" style="margin-bottom:16px;">
+      <label>قالب رسالة الفاتورة (تُرسل من تفاصيل الفاتورة في سجل الفواتير)</label>
+      <textarea id="tpl_invoice" rows="6">${state.settings.templates.invoice}</textarea>
+      <div style="color:var(--text-3); font-size:11.5px; margin-top:6px;">المتغيرات المتاحة: {{customer}} {{code}} {{date}} {{type}} {{phone}} {{controllers}} {{total}}</div>
+    </div>
+    <div class="field" style="margin-bottom:16px;">
+      <label>قالب رسالة استلام الأجهزة</label>
+      <textarea id="tpl_devIntake" rows="6">${state.settings.templates.deviceIntake}</textarea>
+      <div style="color:var(--text-3); font-size:11.5px; margin-top:6px;">المتغيرات المتاحة: {{customer}} {{code}} {{date}} {{count}}</div>
+    </div>
+    <div class="field" style="margin-bottom:16px;">
+      <label>قالب رسالة فاتورة الأجهزة</label>
+      <textarea id="tpl_devInvoice" rows="6">${state.settings.templates.deviceInvoice}</textarea>
+      <div style="color:var(--text-3); font-size:11.5px; margin-top:6px;">المتغيرات المتاحة: {{customer}} {{code}} {{date}} {{phone}} {{count}} {{total}}</div>
+    </div>
+    <button class="btn btn-primary" type="button" id="saveTplBtn">💾 حفظ القوالب</button>`;
+  document.getElementById('saveTplBtn').addEventListener('click', ()=>{
+    state.settings.shopPhone = document.getElementById('shop_phone').value.trim();
+    state.settings.templates.intake = document.getElementById('tpl_intake').value;
+    state.settings.templates.invoice = document.getElementById('tpl_invoice').value;
+    state.settings.templates.deviceIntake = document.getElementById('tpl_devIntake').value;
+    state.settings.templates.deviceInvoice = document.getElementById('tpl_devInvoice').value;
+    toast('تم حفظ القوالب بنجاح');
+    scheduleSave();
+  });
+  document.getElementById('exportBtn').addEventListener('click', exportBackup);
+  document.getElementById('importFile').addEventListener('change', e=>{
+    if(e.target.files[0]) importBackupFile(e.target.files[0]);
+  });
+  const forceBtn = document.getElementById('forceSaveBtn');
+  if(forceBtn) forceBtn.addEventListener('click', saveToCloud);
+
+  const snapBtn = document.getElementById('snapNowBtn');
+  if(snapBtn) snapBtn.addEventListener('click', async ()=>{
+    await saveSnapshot();
+    refreshSnapList();
+  });
+  function refreshSnapList(){
+    if(!cloudEnabled) return;
+    listSnapshots().then(list=>{
+      const el = document.getElementById('snapList');
+      if(!el) return;
+      el.innerHTML = list.length? `<div class="table-wrap"><table><thead><tr><th>النسخة</th><th>آخر تحديث</th><th></th></tr></thead><tbody>
+        ${list.map(s=>`<tr><td>${s.label||s.id}</td><td>${(s.updatedAt||'').slice(0,16).replace('T',' ')}</td><td><button class="btn btn-ghost btn-sm" type="button" data-restore="${s.id}">استعادة</button></td></tr>`).join('')}
+      </tbody></table></div>` : '<div class="empty-state" style="padding:20px;">لا يوجد نسخ محفوظة بعد</div>';
+      el.querySelectorAll('[data-restore]').forEach(b=>{
+        b.addEventListener('click', ()=>{
+          if(confirm('استعادة هذه النسخة هتستبدل كل البيانات الحالية، متأكد؟')){
+            restoreSnapshot(b.dataset.restore).then(refreshSnapList);
+          }
+        });
+      });
+    });
+  }
+  if(cloudEnabled) refreshSnapList();
+
+  const resetBtn = document.getElementById('resetAllBtn');
+  if(resetBtn) resetBtn.addEventListener('click', async ()=>{
+    if(!confirm('متأكد إنك عايز تمسح كل البيانات نهائيًا؟ الإجراء ده لا يمكن التراجع عنه.')) return;
+    const typed = prompt('اكتب "مسح" للتأكيد النهائي:');
+    if(typed !== 'مسح'){ toast('تم إلغاء المسح'); return; }
+    await factoryResetAllData();
+    doLogoutSilently();
+  });
+}
+
+/* ---------- فاتورة بيع ---------- */
+function renderSale(panel){
+  panel.innerHTML = `
+    <div class="panel-head"><div><h2>🛒 فاتورة بيع</h2><div class="ph-sub">بيع قطع غيار مباشرة للعميل بدون صيانة</div></div></div>
+    <div class="seg-toggle" style="max-width:280px;margin-bottom:16px;">
+      <button type="button" data-type="قطاعي" class="active">قطاعي</button>
+      <button type="button" data-type="تجاري">تجاري</button>
+    </div>
+    <div class="form-grid">
+      <div class="field"><label>اسم العميل</label><input id="s_customer" placeholder="اسم العميل (اختياري)"></div>
+      <div class="field"><label>نوع الجهاز</label><select id="s_console"><option value="ps5">فايف (PS5)</option><option value="ps4">فور (PS4)</option></select></div>
+      <div class="field"><label>الصنف</label><select id="s_item"></select></div>
+      <div class="field"><label>الكمية</label><input type="number" id="s_qty" value="1" min="1"></div>
+      <div class="field"><label>الإجمالي</label><input id="s_total" disabled></div>
+    </div>
+    <button class="btn btn-primary" style="margin-top:18px" type="button" id="saleSaveBtn">💳 إصدار فاتورة البيع</button>
+    <h3 style="margin:24px 0 12px; font-size:15px;">آخر فواتير البيع</h3>
+    <div class="table-wrap"><table><thead><tr><th>الرقم</th><th>الصنف</th><th>الكمية</th><th>الإجمالي</th><th>التاريخ</th></tr></thead><tbody id="saleTbody"></tbody></table></div>`;
+  let saleType='قطاعي';
+  panel.querySelectorAll('.seg-toggle button').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      saleType=b.dataset.type;
+      panel.querySelectorAll('.seg-toggle button').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
+      fillItems();
+    });
+  });
+  function fillItems(){
+    const cons = document.getElementById('s_console').value;
+    const sel = document.getElementById('s_item');
+    sel.innerHTML = state.parts[cons].map(p=>`<option value="${p.id}" data-price="${saleType==='تجاري'?p.commercial:p.retail}">${p.name} — ${money(saleType==='تجاري'?p.commercial:p.retail)}</option>`).join('') || '<option disabled>لا توجد قطع متاحة</option>';
+    updateTotal();
+  }
+  document.getElementById('s_console').addEventListener('change', fillItems);
+  function updateTotal(){
+    const sel = document.getElementById('s_item');
+    if(!sel.selectedOptions[0] || !sel.selectedOptions[0].dataset.price){ document.getElementById('s_total').value=''; return; }
+    const price = Number(sel.selectedOptions[0].dataset.price);
+    const qty = Number(document.getElementById('s_qty').value)||0;
+    document.getElementById('s_total').value = money(price*qty);
+  }
+  document.getElementById('s_item').addEventListener('change', updateTotal);
+  document.getElementById('s_qty').addEventListener('input', updateTotal);
+  function drawSales(){
+    document.getElementById('saleTbody').innerHTML = state.sales.map(s=>`
+      <tr><td>${s.id}</td><td>${s.item}</td><td>${s.qty}</td><td>${money(s.price*s.qty)}</td><td>${s.date}</td></tr>`).join('');
+  }
+  document.getElementById('saleSaveBtn').addEventListener('click', ()=>{
+    const cons = document.getElementById('s_console').value;
+    const sel = document.getElementById('s_item');
+    const part = state.parts[cons].find(p=>p.id==sel.value);
+    if(!part){ toast('لا توجد قطعة محددة'); return; }
+    const price = saleType==='تجاري'?part.commercial:part.retail;
+    const qty = Number(document.getElementById('s_qty').value)||1;
+    if(part.qty!=null) part.qty = Math.max(0, part.qty-qty);
+    const id = 'SAL-' + (state.seq.sale++);
+    state.sales.unshift({id, item:part.name, qty, price, customer:document.getElementById('s_customer').value||'زائر', date:new Date().toISOString().slice(0,10)});
+    toast('تم إصدار فاتورة البيع ' + id);
+    scheduleSave();
+    document.getElementById('s_customer').value='';
+    document.getElementById('s_qty').value=1;
+    drawSales();
+  });
+  fillItems();
+  drawSales();
+}
+
+/* ============ Circuit background animation ============ */
+(function(){
+  const canvas = document.getElementById('circuitCanvas');
+  const ctx = canvas.getContext('2d');
+  let w,h, nodes=[];
+  function resize(){ w=canvas.width=innerWidth; h=canvas.height=innerHeight; }
+  resize(); addEventListener('resize', resize);
+  const N = 46;
+  for(let i=0;i<N;i++){
+    nodes.push({x:Math.random()*w, y:Math.random()*h, vx:(Math.random()-.5)*.25, vy:(Math.random()-.5)*.25});
+  }
+  function tick(){
+    ctx.clearRect(0,0,w,h);
+    const isLight = document.documentElement.getAttribute('data-theme')==='light';
+    ctx.strokeStyle = isLight? 'rgba(46,99,201,0.12)' : 'rgba(51,224,255,0.14)';
+    ctx.fillStyle = isLight? 'rgba(46,99,201,0.35)' : 'rgba(51,224,255,0.5)';
+    for(const n of nodes){
+      n.x+=n.vx; n.y+=n.vy;
+      if(n.x<0||n.x>w) n.vx*=-1;
+      if(n.y<0||n.y>h) n.vy*=-1;
+    }
+    for(let i=0;i<N;i++){
+      for(let j=i+1;j<N;j++){
+        const dx=nodes[i].x-nodes[j].x, dy=nodes[i].y-nodes[j].y;
+        const d = Math.hypot(dx,dy);
+        if(d<140){
+          ctx.globalAlpha = 1-d/140;
+          ctx.beginPath(); ctx.moveTo(nodes[i].x,nodes[i].y); ctx.lineTo(nodes[j].x,nodes[j].y); ctx.stroke();
+        }
+      }
+    }
+    ctx.globalAlpha=1;
+    for(const n of nodes){ ctx.beginPath(); ctx.arc(n.x,n.y,1.6,0,7); ctx.fill(); }
+    requestAnimationFrame(tick);
+  }
+  tick();
+})();
+
+/* ============ INIT ============ */
+function withTimeout(promise, ms){
+  return Promise.race([
+    promise,
+    new Promise(resolve=> setTimeout(()=>resolve(false), ms))
+  ]);
+}
+populateLoginUserSelect();
+setTimeout(()=>{
+  const el = document.getElementById('splash');
+  if(el){ el.style.opacity='0'; el.style.visibility='hidden'; }
+}, 1200);
+(async function init(){
+  if(!cloudEnabled) return;
+  try{
+    const ok = await withTimeout(ensureAuth(), 7000);
+    if(ok){
+      await withTimeout(loadFromCloud(), 7000);
+      populateLoginUserSelect();
+      autoDailySnapshot();
+    } else {
+      cloudEnabled = false;
+      setSyncStatus('off','محلي فقط (تعذر الاتصال)');
+    }
+  }catch(e){
+    console.error(e);
+    cloudEnabled = false;
+    setSyncStatus('off','محلي فقط (خطأ اتصال)');
+  }
+})();
+applyTheme('dark');
+</script>
+</body>
+</html>
